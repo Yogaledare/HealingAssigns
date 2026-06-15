@@ -30,7 +30,9 @@ jobs:
         with:
           resourceGroupName: rg-healingassigns-dev
           template: infra/main.bicep
-          parameters: infra/main.bicepparam
+          parameters: >
+            infra/main.bicepparam
+            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
           failOnStdErr: false
 
   deploy-api:

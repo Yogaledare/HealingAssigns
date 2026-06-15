@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealingAssigns.Api", "HealingAssigns.Api\HealingAssigns.Api.csproj", "{C50768B8-0FDB-4D45-9F3F-394E2F6544F1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealingAssigns.Sql", "HealingAssigns.Sql\HealingAssigns.Sql.csproj", "{67365998-E5AB-4941-8033-FAF2FEC25F05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,10 +29,20 @@ Global
 		{C50768B8-0FDB-4D45-9F3F-394E2F6544F1}.Release|x64.Build.0 = Release|Any CPU
 		{C50768B8-0FDB-4D45-9F3F-394E2F6544F1}.Release|x86.ActiveCfg = Release|Any CPU
 		{C50768B8-0FDB-4D45-9F3F-394E2F6544F1}.Release|x86.Build.0 = Release|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Debug|x64.Build.0 = Debug|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Debug|x86.Build.0 = Debug|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Release|x64.ActiveCfg = Release|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Release|x64.Build.0 = Release|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Release|x86.ActiveCfg = Release|Any CPU
+		{67365998-E5AB-4941-8033-FAF2FEC25F05}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

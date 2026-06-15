@@ -1,8 +1,21 @@
+using HealingAssigns.Api;
+using HealingAssigns.Sql;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddDbContext<HealingAssignsDb>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<WeatherService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<HealingAssignsDb>();
+    await db.Database.EnsureCreatedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -11,27 +24,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapPost("/weatherforecast", async (WeatherService service) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var forecast = await service.GenerateAndSave();
+    return Results.Created($"/weatherforecast/{forecast.Id}", forecast);
+});
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/weatherforecast", async (WeatherService service) =>
 {
-    return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-    {
-        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-        TemperatureC = Random.Shared.Next(-20, 55),
-        Summary = summaries[Random.Shared.Next(summaries.Length)]
-    }).ToArray();
+    return await service.GetAll();
 });
 
 app.Run();
-
-record WeatherForecast
-{
-    public DateOnly Date { get; init; }
-    public int TemperatureC { get; init; }
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    public string? Summary { get; init; }
-}

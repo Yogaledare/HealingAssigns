@@ -11,6 +11,9 @@ x86/
 [Oo]bj/
 publish/
 
+# Local dev config (may contain secrets)
+appsettings.Development.json
+
 # Node / React
 node_modules/
 dist/
@@ -31,3 +34,4 @@ Desktop.ini
 
 # Azure
 *.azurite/
+infra/main.json
