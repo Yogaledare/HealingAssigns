@@ -1,4 +1,4 @@
-@HealingAssigns.Api_HostAddress = http://localhost:5176
+@HealingAssigns.Api_HostAddress = http://localhost:5113
 
 GET {{HealingAssigns.Api_HostAddress}}/weatherforecast/
 Accept: application/json
