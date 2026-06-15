@@ -30,6 +30,9 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 resource apiApp 'Microsoft.Web/sites@2023-12-01' = {
   name: 'app-api-${suffix}'
   location: location
+  identity: {
+    type: 'None'
+  }
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
