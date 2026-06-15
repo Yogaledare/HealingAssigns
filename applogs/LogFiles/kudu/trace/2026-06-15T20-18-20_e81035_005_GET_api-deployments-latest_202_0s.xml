@@ -1,0 +1,8 @@
+<step title="Incoming Request" date="2026-06-15T20:18:20.771" instance="e81035" url="/api/deployments/latest?deployer=OneDeploy&amp;time=2026-06-15_20-18-20Z" method="GET" type="request" pid="851,1,5" Host="app-api-healingassigns-dev.scm.azurewebsites.net" User-Agent="GITHUBACTIONS_DeployWebAppToAzure_923069f46dee40f98cf6238918ca5c886eaf3639f0b15dacfd918a0f730dfaaa_v3.0.8" Authorization="Bea..." Content-Type="application/json; charset=utf-8" Cookie="ARRAffinity=e810352f4b36088642b979852abe5d5ce3112c2251d97b45d306beb6d36b0a83; ARRAffinitySameSite=e810352f4b36088642b979852abe5d5ce3112c2251d97b45d306beb6d36b0a83" Content-Length="0" X-ARR-LOG-ID="2fdad531-abd6-41a2-bd8c-d8eb8c8e48f2" CLIENT-IP="20.161.45.123:45120" X-SITE-DEPLOYMENT-ID="app-api-healingassigns-dev" WAS-DEFAULT-HOSTNAME="app-api-healingassigns-dev.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/deployments/latest?deployer=OneDeploy&amp;time=2026-06-15_20-18-20Z" X-Client-IP="20.161.45.123" X-Client-Port="45120" >
+  <step title="DeploymentService.GetResult" date="2026-06-15T20:18:20.792" >
+    <step title="DeploymentService.GetLatestDeployment" date="2026-06-15T20:18:20.800" >
+      <step title="DeploymentManager.GetResults" date="2026-06-15T20:18:20.813" /><!-- duration: 214ms -->
+    </step><!-- duration: 236ms -->
+  </step><!-- duration: 248ms -->
+  <step title="Outgoing response" date="2026-06-15T20:18:21.048" type="response" statusCode="202" statusText="Accepted" /><!-- duration: 4ms -->
+</step><!-- duration: 286ms -->

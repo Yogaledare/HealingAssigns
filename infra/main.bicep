@@ -30,61 +30,20 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 resource apiApp 'Microsoft.Web/sites@2023-12-01' = {
   name: 'app-api-${suffix}'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
       alwaysOn: false
-      appSettings: [
-        {
-          name: 'ASPNETCORE_ENVIRONMENT'
-          value: environment == 'prod' ? 'Production' : 'Development'
-        }
-      ]
       connectionStrings: [
         {
           name: 'DefaultConnection'
-          connectionString: '@Microsoft.KeyVault(SecretUri=${kvSecretConnectionString.properties.secretUri})'
+          connectionString: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${sqlDatabase.name};User ID=sqladmin;Password=${sqlAdminPassword};Encrypt=true;TrustServerCertificate=false;'
           type: 'SQLAzure'
         }
       ]
     }
     httpsOnly: true
-  }
-}
-
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
-  name: 'kv-${suffix}'
-  location: location
-  properties: {
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    tenantId: subscription().tenantId
-    enableRbacAuthorization: true
-  }
-}
-
-resource kvSecretConnectionString 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
-  parent: keyVault
-  name: 'SqlConnectionString'
-  properties: {
-    value: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Database=${sqlDatabase.name};User ID=sqladmin;Password=${sqlAdminPassword};Encrypt=true;TrustServerCertificate=false;'
-  }
-}
-
-// App Service needs Key Vault Secrets User role to read secrets
-resource kvRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(keyVault.id, apiApp.id, '4633458b-17de-408a-b874-0445c86b69e6')
-  scope: keyVault
-  properties: {
-    principalId: apiApp.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
   }
 }
 
@@ -128,4 +87,3 @@ output apiAppName string = apiApp.name
 output apiAppUrl string = 'https://${apiApp.properties.defaultHostName}'
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 output sqlDatabaseName string = sqlDatabase.name
-output keyVaultName string = keyVault.name

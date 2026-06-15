@@ -1,0 +1,90 @@
+2026-06-15T20:11:28.5817634Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:11:29.3786816Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:11:29.3792797Z Container start method called.
+2026-06-15T20:11:29.3807092Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:11:29.3815609Z Establishing network.
+2026-06-15T20:11:29.3817634Z Pulling image: appsvc/dotnetcore:10.0_20260504.4.tuxprod.
+2026-06-15T20:11:53.3638617Z Image appsvc/dotnetcore:10.0_20260504.4.tuxprod is pulled from registry 10.1.0.4:13209
+2026-06-15T20:11:53.3640667Z Container is starting.
+2026-06-15T20:11:53.3728814Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:11:53.3730913Z Establishing user namespace if not established already.
+2026-06-15T20:11:53.3732479Z Establishing network if not established already.
+2026-06-15T20:11:53.3734071Z Mounting volumes.
+2026-06-15T20:11:53.3763330Z Nested mountpoint 
+2026-06-15T20:11:53.3813701Z Nested mountpoint volatile/logs
+2026-06-15T20:11:53.3896606Z Nested mountpoint 
+2026-06-15T20:11:53.4286140Z Nested mountpoint 
+2026-06-15T20:11:53.4298620Z Nested mountpoint 
+2026-06-15T20:11:53.5288607Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for app-api-healingassigns-dev. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-06-15T20:11:53.5290185Z Creating container.
+2026-06-15T20:11:53.5291479Z Creating pipes for streaming container io.
+2026-06-15T20:11:53.5296232Z Creating stdout named pipe at /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5317126Z Successfully created stdout named pipe at: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5320356Z Opening named pipe /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c for reading in non-blocking mode.
+2026-06-15T20:11:53.5323181Z Successfully opened named pipe: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5325788Z Successfully removed non-blocking flag from /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5337885Z Creating stderr named pipe at /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5341217Z Successfully created stderr named pipe at: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5343084Z Opening named pipe /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8 for reading in non-blocking mode.
+2026-06-15T20:11:53.5346220Z Successfully opened named pipe: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5347620Z Successfully removed non-blocking flag from /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5350043Z Creating container with image: appsvc/dotnetcore:10.0_20260504.4.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod
+2026-06-15T20:11:54.0045611Z Starting container: 3715ffec07d2_app-api-healingassigns-dev.
+2026-06-15T20:11:54.0325000Z Starting watchers and probes.
+2026-06-15T20:11:54.0370679Z Starting metrics collection.
+2026-06-15T20:11:54.0379420Z Container is running.
+2026-06-15T20:11:54.0382889Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:11:54.0805757Z Container start method finished after 24701 ms.
+2026-06-15T20:11:54.0822767Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:11:54.0970552Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-06-15T20:12:31.4951461Z Site startup probe succeeded after 37.3688521 seconds.
+2026-06-15T20:12:31.6606353Z State: Starting, Action: WarmUpProbeSucceeded, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site startup probe succeeded after 37.3688521 seconds., DetailsLevel: INFO
+2026-06-15T20:12:32.0056584Z Site is running with deployment version: 06add8f0-9600-483c-a649-e1b5f2f7c71f
+2026-06-15T20:12:32.0101813Z Site started.
+2026-06-15T20:12:32.0102798Z State: Started, Action: None, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site started at 06/15/2026 20:12:32 (UTC), DetailsLevel: INFO
+2026-06-15T20:12:32.1156435Z Site is running with patch version DOTNETCORE 10.0.7
+2026-06-15T20:14:21.4453684Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:14:22.4942974Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:14:22.5026903Z Container start method called.
+2026-06-15T20:14:22.5118033Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:14:22.5121887Z Establishing network.
+2026-06-15T20:14:22.5123825Z Pulling image: appsvc/dotnetcore:10.0_20260504.4.tuxprod.
+2026-06-15T20:14:51.5379720Z Image appsvc/dotnetcore:10.0_20260504.4.tuxprod is pulled from registry 10.1.0.4:13209
+2026-06-15T20:14:51.5942834Z Container is starting.
+2026-06-15T20:14:51.6086664Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:14:51.6089983Z Establishing user namespace if not established already.
+2026-06-15T20:14:51.6091192Z Establishing network if not established already.
+2026-06-15T20:14:51.6092445Z Mounting volumes.
+2026-06-15T20:14:51.6232933Z Nested mountpoint 
+2026-06-15T20:14:51.6846264Z Nested mountpoint volatile/logs
+2026-06-15T20:14:51.6893253Z Nested mountpoint 
+2026-06-15T20:14:51.7292026Z Nested mountpoint 
+2026-06-15T20:14:51.7361438Z Nested mountpoint 
+2026-06-15T20:14:51.9546287Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for app-api-healingassigns-dev. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-06-15T20:14:51.9550460Z Creating container.
+2026-06-15T20:14:51.9560093Z Creating pipes for streaming container io.
+2026-06-15T20:14:51.9574822Z Creating stdout named pipe at /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9585750Z Successfully created stdout named pipe at: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9613722Z Opening named pipe /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee for reading in non-blocking mode.
+2026-06-15T20:14:51.9618914Z Successfully opened named pipe: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9632405Z Successfully removed non-blocking flag from /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9645465Z Creating stderr named pipe at /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9647645Z Successfully created stderr named pipe at: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9661462Z Opening named pipe /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471 for reading in non-blocking mode.
+2026-06-15T20:14:51.9663809Z Successfully opened named pipe: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9665378Z Successfully removed non-blocking flag from /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9704118Z Creating container with image: appsvc/dotnetcore:10.0_20260504.4.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod
+2026-06-15T20:14:54.5314485Z Starting container: ca0a3b8f8bb7_app-api-healingassigns-dev.
+2026-06-15T20:14:54.7471823Z Starting watchers and probes.
+2026-06-15T20:14:54.8039874Z Starting metrics collection.
+2026-06-15T20:14:54.8245034Z Container is running.
+2026-06-15T20:14:54.8254788Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:14:55.2601795Z Container start method finished after 32757 ms.
+2026-06-15T20:14:55.2612139Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:14:55.2792450Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-06-15T20:15:08.4646393Z Site startup probe succeeded after 13.1554701 seconds.
+2026-06-15T20:15:08.5382096Z State: Starting, Action: WarmUpProbeSucceeded, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site startup probe succeeded after 13.1554701 seconds., DetailsLevel: INFO
+2026-06-15T20:15:08.7281990Z Site is running with deployment version: 06add8f0-9600-483c-a649-e1b5f2f7c71f
+2026-06-15T20:15:08.7305468Z Site started.
+2026-06-15T20:15:08.7315053Z State: Started, Action: None, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site started at 06/15/2026 20:15:08 (UTC), DetailsLevel: INFO
+2026-06-15T20:15:08.8619039Z Site is running with patch version DOTNETCORE 10.0.7

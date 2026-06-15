@@ -1,0 +1,189 @@
+2026-06-15T20:11:28.5817634+00:00 ContainerStatus: State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:11:29.3786816+00:00 ContainerStatus: State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:11:29.3792797+00:00 ContainerStatus: Container start method called.
+2026-06-15T20:11:29.3807092+00:00 ContainerStatus: State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:11:29.3815609+00:00 ContainerStatus: Establishing network.
+2026-06-15T20:11:29.3817634+00:00 ContainerStatus: Pulling image: appsvc/dotnetcore:10.0_20260504.4.tuxprod.
+2026-06-15T20:11:53.3638617+00:00 ContainerStatus: Image appsvc/dotnetcore:10.0_20260504.4.tuxprod is pulled from registry 10.1.0.4:13209
+2026-06-15T20:11:53.3640667+00:00 ContainerStatus: Container is starting.
+2026-06-15T20:11:53.3728814+00:00 ContainerStatus: State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:11:53.3730913+00:00 ContainerStatus: Establishing user namespace if not established already.
+2026-06-15T20:11:53.3732479+00:00 ContainerStatus: Establishing network if not established already.
+2026-06-15T20:11:53.3734071+00:00 ContainerStatus: Mounting volumes.
+2026-06-15T20:11:53.3763330+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:11:53.3813701+00:00 ContainerStatus: Nested mountpoint volatile/logs
+2026-06-15T20:11:53.3896606+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:11:53.4286140+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:11:53.4298620+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:11:53.5288607+00:00 ContainerStatus: State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for app-api-healingassigns-dev. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-06-15T20:11:53.5290185+00:00 ContainerStatus: Creating container.
+2026-06-15T20:11:53.5291479+00:00 ContainerStatus: Creating pipes for streaming container io.
+2026-06-15T20:11:53.5296232+00:00 ContainerStatus: Creating stdout named pipe at /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5317126+00:00 ContainerStatus: Successfully created stdout named pipe at: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5320356+00:00 ContainerStatus: Opening named pipe /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c for reading in non-blocking mode.
+2026-06-15T20:11:53.5323181+00:00 ContainerStatus: Successfully opened named pipe: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5325788+00:00 ContainerStatus: Successfully removed non-blocking flag from /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stdout_282a4ca1a1f84fd7831d2f26b215b30c.
+2026-06-15T20:11:53.5337885+00:00 ContainerStatus: Creating stderr named pipe at /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5341217+00:00 ContainerStatus: Successfully created stderr named pipe at: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5343084+00:00 ContainerStatus: Opening named pipe /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8 for reading in non-blocking mode.
+2026-06-15T20:11:53.5346220+00:00 ContainerStatus: Successfully opened named pipe: /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5347620+00:00 ContainerStatus: Successfully removed non-blocking flag from /podr/container/pipe/3715ffec07d2_app-api-healingassigns-dev/stderr_9292e8f311464d368815aceffc7a33f8.
+2026-06-15T20:11:53.5350043+00:00 ContainerStatus: Creating container with image: appsvc/dotnetcore:10.0_20260504.4.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod
+2026-06-15T20:11:54.0045611+00:00 ContainerStatus: Starting container: 3715ffec07d2_app-api-healingassigns-dev.
+2026-06-15T20:11:54.0325000+00:00 ContainerStatus: Starting watchers and probes.
+2026-06-15T20:11:54.0370679+00:00 ContainerStatus: Starting metrics collection.
+2026-06-15T20:11:54.0379420+00:00 ContainerStatus: Container is running.
+2026-06-15T20:11:54.0382889+00:00 ContainerStatus: State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:11:54.0805757+00:00 ContainerStatus: Container start method finished after 24701 ms.
+2026-06-15T20:11:54.0822767+00:00 ContainerStatus: State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:11:54.0914938+00:00 ContainerStream:    _____                               
+2026-06-15T20:11:54.0970552+00:00 ContainerStatus: State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-06-15T20:11:54.0978018+00:00 ContainerStream:   /  _  \ __________ _________   ____  
+2026-06-15T20:11:54.0978609+00:00 ContainerStream:  /  /_\  \\___   /  |  \_  __ \_/ __ \ 
+2026-06-15T20:11:54.0978678+00:00 ContainerStream: /    |    \/    /|  |  /|  | \/\  ___/ 
+2026-06-15T20:11:54.0978718+00:00 ContainerStream: \____|__  /_____ \____/ |__|    \___  >
+2026-06-15T20:11:54.0978757+00:00 ContainerStream:         \/      \/                  \/ 
+2026-06-15T20:11:54.0978852+00:00 ContainerStream: A P P   S E R V I C E   O N   L I N U X
+2026-06-15T20:11:54.0978894+00:00 ContainerStream: 
+2026-06-15T20:11:54.0978940+00:00 ContainerStream: Documentation       : http://aka.ms/webapp-linux
+2026-06-15T20:11:54.0978985+00:00 ContainerStream: Dotnet quickstart   : https://aka.ms/dotnet-qs
+2026-06-15T20:11:54.0979035+00:00 ContainerStream: ASP .NETCore Version: 10.0.7
+2026-06-15T20:11:54.0979075+00:00 ContainerStream: Instance Name       : 10-30-0-142
+2026-06-15T20:11:54.0979154+00:00 ContainerStream: Instance Id         : 4811481022406343dec17cf4fd8bdf07b861b8e964e8b6c357e7bf184c92d6e0
+2026-06-15T20:11:54.0979247+00:00 ContainerStream: 
+2026-06-15T20:11:54.0979287+00:00 ContainerStream: Note: Any data outside '/home' is not persisted
+2026-06-15T20:11:56.3635564+00:00 ContainerStream:  * Starting OpenBSD Secure Shell server sshd
+2026-06-15T20:11:56.7280681+00:00 ContainerStream:    ...done.
+2026-06-15T20:11:56.7825088+00:00 ContainerStream: WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2026-06-15T20:11:56.8330992+00:00 ContainerStream: Updating certificates in /etc/ssl/certs...
+2026-06-15T20:12:06.3621604+00:00 ContainerStream: rehash: warning: skipping duplicate certificate in SSLcom-TLS-Root-2022-ECC.pem
+2026-06-15T20:12:06.3626405+00:00 ContainerStream: rehash: warning: skipping duplicate certificate in SSLcom-TLS-Root-2022-RSA.pem
+2026-06-15T20:12:06.6321458+00:00 ContainerStream: rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2026-06-15T20:12:06.7735665+00:00 ContainerStream: 4 added, 0 removed; done.
+2026-06-15T20:12:06.7736455+00:00 ContainerStream: Running hooks in /etc/ca-certificates/update.d...
+2026-06-15T20:12:06.7771594+00:00 ContainerStream: done.
+2026-06-15T20:12:06.9759294+00:00 ContainerStream: CA certificates copied and updated successfully.
+2026-06-15T20:12:08.3657555+00:00 ContainerStream:  * Starting periodic command scheduler cron
+2026-06-15T20:12:08.3861485+00:00 ContainerStream:    ...done.
+2026-06-15T20:12:08.4015279+00:00 ContainerStream: Running oryx create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -defaultAppFilePath /defaulthome/hostingstart/hostingstart.dll     -bindPort 8080 -bindPort2 '' -userStartupCommand '' 
+2026-06-15T20:12:11.1901255+00:00 ContainerStream: Could not find build manifest file at '/home/site/wwwroot/oryx-manifest.toml'
+2026-06-15T20:12:11.1901898+00:00 ContainerStream: Could not find operation ID in manifest. Generating an operation id...
+2026-06-15T20:12:11.2586239+00:00 ContainerStream: Build Operation ID: 3f4db25e-d2cf-4804-a965-91b4eaf522ff
+2026-06-15T20:12:13.6385963+00:00 ContainerStream: 
+2026-06-15T20:12:13.6386691+00:00 ContainerStream: Agent extension 
+2026-06-15T20:12:13.6386750+00:00 ContainerStream: Before if loop >> DotNet Runtime 
+2026-06-15T20:12:13.8189404+00:00 ContainerStream: DotNet Runtime 10.0Writing output script to '/opt/startup/startup.sh'
+2026-06-15T20:12:14.4606548+00:00 ContainerStream: Trying to find the startup DLL name...
+2026-06-15T20:12:14.4608617+00:00 ContainerStream: Found the startup D name: HealingAssigns.Api.dll
+2026-06-15T20:12:14.4611905+00:00 ContainerStream: Running the command: dotnet "HealingAssigns.Api.dll"
+2026-06-15T20:12:30.5902060+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[14]
+2026-06-15T20:12:30.5902629+00:00 ContainerStream:       Now listening on: http://[::]:8080
+2026-06-15T20:12:30.6032543+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[0]
+2026-06-15T20:12:30.6033096+00:00 ContainerStream:       Application started. Press Ctrl+C to shut down.
+2026-06-15T20:12:30.6174471+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[0]
+2026-06-15T20:12:30.6174943+00:00 ContainerStream:       Hosting environment: Development
+2026-06-15T20:12:30.6242533+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[0]
+2026-06-15T20:12:30.6242945+00:00 ContainerStream:       Content root path: /home/site/wwwroot
+2026-06-15T20:12:31.3843130+00:00 ContainerStream: warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+2026-06-15T20:12:31.3843833+00:00 ContainerStream:       Failed to determine the https port for redirect.
+2026-06-15T20:12:31.4951461+00:00 ContainerStatus: Site startup probe succeeded after 37.3688521 seconds.
+2026-06-15T20:12:31.6606353+00:00 ContainerStatus: State: Starting, Action: WarmUpProbeSucceeded, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site startup probe succeeded after 37.3688521 seconds., DetailsLevel: INFO
+2026-06-15T20:12:32.0056584+00:00 ContainerStatus: Site is running with deployment version: 06add8f0-9600-483c-a649-e1b5f2f7c71f
+2026-06-15T20:12:32.0101813+00:00 ContainerStatus: Site started.
+2026-06-15T20:12:32.0102798+00:00 ContainerStatus: State: Started, Action: None, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site started at 06/15/2026 20:12:32 (UTC), DetailsLevel: INFO
+2026-06-15T20:12:32.1156435+00:00 ContainerStatus: Site is running with patch version DOTNETCORE 10.0.7
+========== New Cold Start Attempt (2026-06-15T20:14:21.4453684+00:00) ==========
+2026-06-15T20:14:21.4453684+00:00 ContainerStatus: State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:14:22.4942974+00:00 ContainerStatus: State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-06-15T20:14:22.5026903+00:00 ContainerStatus: Container start method called.
+2026-06-15T20:14:22.5118033+00:00 ContainerStatus: State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:14:22.5121887+00:00 ContainerStatus: Establishing network.
+2026-06-15T20:14:22.5123825+00:00 ContainerStatus: Pulling image: appsvc/dotnetcore:10.0_20260504.4.tuxprod.
+2026-06-15T20:14:51.5379720+00:00 ContainerStatus: Image appsvc/dotnetcore:10.0_20260504.4.tuxprod is pulled from registry 10.1.0.4:13209
+2026-06-15T20:14:51.5942834+00:00 ContainerStatus: Container is starting.
+2026-06-15T20:14:51.6086664+00:00 ContainerStatus: State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for app-api-healingassigns-dev., DetailsLevel: INFO
+2026-06-15T20:14:51.6089983+00:00 ContainerStatus: Establishing user namespace if not established already.
+2026-06-15T20:14:51.6091192+00:00 ContainerStatus: Establishing network if not established already.
+2026-06-15T20:14:51.6092445+00:00 ContainerStatus: Mounting volumes.
+2026-06-15T20:14:51.6232933+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:14:51.6846264+00:00 ContainerStatus: Nested mountpoint volatile/logs
+2026-06-15T20:14:51.6893253+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:14:51.7292026+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:14:51.7361438+00:00 ContainerStatus: Nested mountpoint 
+2026-06-15T20:14:51.9546287+00:00 ContainerStatus: State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for app-api-healingassigns-dev. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-06-15T20:14:51.9550460+00:00 ContainerStatus: Creating container.
+2026-06-15T20:14:51.9560093+00:00 ContainerStatus: Creating pipes for streaming container io.
+2026-06-15T20:14:51.9574822+00:00 ContainerStatus: Creating stdout named pipe at /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9585750+00:00 ContainerStatus: Successfully created stdout named pipe at: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9613722+00:00 ContainerStatus: Opening named pipe /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee for reading in non-blocking mode.
+2026-06-15T20:14:51.9618914+00:00 ContainerStatus: Successfully opened named pipe: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9632405+00:00 ContainerStatus: Successfully removed non-blocking flag from /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stdout_2b62a80771cb4e5d907096cee84c00ee.
+2026-06-15T20:14:51.9645465+00:00 ContainerStatus: Creating stderr named pipe at /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9647645+00:00 ContainerStatus: Successfully created stderr named pipe at: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9661462+00:00 ContainerStatus: Opening named pipe /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471 for reading in non-blocking mode.
+2026-06-15T20:14:51.9663809+00:00 ContainerStatus: Successfully opened named pipe: /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9665378+00:00 ContainerStatus: Successfully removed non-blocking flag from /podr/container/pipe/ca0a3b8f8bb7_app-api-healingassigns-dev/stderr_7ab9e9d995d4492bb4e8e24d50651471.
+2026-06-15T20:14:51.9704118+00:00 ContainerStatus: Creating container with image: appsvc/dotnetcore:10.0_20260504.4.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/dotnetcore:10.0_20260504.4.tuxprod
+2026-06-15T20:14:54.5314485+00:00 ContainerStatus: Starting container: ca0a3b8f8bb7_app-api-healingassigns-dev.
+2026-06-15T20:14:54.7471823+00:00 ContainerStatus: Starting watchers and probes.
+2026-06-15T20:14:54.8039874+00:00 ContainerStatus: Starting metrics collection.
+2026-06-15T20:14:54.8245034+00:00 ContainerStatus: Container is running.
+2026-06-15T20:14:54.8254788+00:00 ContainerStatus: State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:14:54.8887755+00:00 ContainerStream:    _____                               
+2026-06-15T20:14:54.8931491+00:00 ContainerStream:   /  _  \ __________ _________   ____  
+2026-06-15T20:14:54.8932016+00:00 ContainerStream:  /  /_\  \\___   /  |  \_  __ \_/ __ \ 
+2026-06-15T20:14:54.8932095+00:00 ContainerStream: /    |    \/    /|  |  /|  | \/\  ___/ 
+2026-06-15T20:14:54.8932150+00:00 ContainerStream: \____|__  /_____ \____/ |__|    \___  >
+2026-06-15T20:14:54.8932279+00:00 ContainerStream:         \/      \/                  \/ 
+2026-06-15T20:14:54.8932332+00:00 ContainerStream: A P P   S E R V I C E   O N   L I N U X
+2026-06-15T20:14:54.8932378+00:00 ContainerStream: 
+2026-06-15T20:14:54.8932480+00:00 ContainerStream: Documentation       : http://aka.ms/webapp-linux
+2026-06-15T20:14:54.8932800+00:00 ContainerStream: Dotnet quickstart   : https://aka.ms/dotnet-qs
+2026-06-15T20:14:54.8932862+00:00 ContainerStream: ASP .NETCore Version: 10.0.7
+2026-06-15T20:14:54.8932915+00:00 ContainerStream: Instance Name       : 10-30-0-142
+2026-06-15T20:14:54.8932988+00:00 ContainerStream: Instance Id         : 4811481022406343dec17cf4fd8bdf07b861b8e964e8b6c357e7bf184c92d6e0
+2026-06-15T20:14:54.8933069+00:00 ContainerStream: 
+2026-06-15T20:14:54.8933138+00:00 ContainerStream: Note: Any data outside '/home' is not persisted
+2026-06-15T20:14:55.2601795+00:00 ContainerStatus: Container start method finished after 32757 ms.
+2026-06-15T20:14:55.2612139+00:00 ContainerStatus: State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container app-api-healingassigns-dev successfully created and is running., DetailsLevel: INFO
+2026-06-15T20:14:55.2792450+00:00 ContainerStatus: State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-06-15T20:14:56.5731103+00:00 ContainerStream:  * Starting OpenBSD Secure Shell server sshd
+2026-06-15T20:14:56.6290848+00:00 ContainerStream:    ...done.
+2026-06-15T20:14:56.8534503+00:00 ContainerStream: WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2026-06-15T20:14:56.9013279+00:00 ContainerStream: Updating certificates in /etc/ssl/certs...
+2026-06-15T20:15:06.3026502+00:00 ContainerStream: rehash: warning: skipping duplicate certificate in SSLcom-TLS-Root-2022-ECC.pem
+2026-06-15T20:15:06.3034146+00:00 ContainerStream: rehash: warning: skipping duplicate certificate in SSLcom-TLS-Root-2022-RSA.pem
+2026-06-15T20:15:06.4133627+00:00 ContainerStream: rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2026-06-15T20:15:06.4361341+00:00 ContainerStream: 4 added, 0 removed; done.
+2026-06-15T20:15:06.4362236+00:00 ContainerStream: Running hooks in /etc/ca-certificates/update.d...
+2026-06-15T20:15:06.4400267+00:00 ContainerStream: done.
+2026-06-15T20:15:06.4502937+00:00 ContainerStream: CA certificates copied and updated successfully.
+2026-06-15T20:15:06.5869914+00:00 ContainerStream:  * Starting periodic command scheduler cron
+2026-06-15T20:15:06.5973591+00:00 ContainerStream:    ...done.
+2026-06-15T20:15:06.6007229+00:00 ContainerStream: Running oryx create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -defaultAppFilePath /defaulthome/hostingstart/hostingstart.dll     -bindPort 8080 -bindPort2 '' -userStartupCommand '' 
+2026-06-15T20:15:06.6863399+00:00 ContainerStream: Could not find build manifest file at '/home/site/wwwroot/oryx-manifest.toml'
+2026-06-15T20:15:06.6864183+00:00 ContainerStream: Could not find operation ID in manifest. Generating an operation id...
+2026-06-15T20:15:06.6869289+00:00 ContainerStream: Build Operation ID: 62855da5-8ff2-46c7-9f05-11fedb960ce3
+2026-06-15T20:15:06.8476330+00:00 ContainerStream: 
+2026-06-15T20:15:06.8486291+00:00 ContainerStream: Agent extension 
+2026-06-15T20:15:06.8486504+00:00 ContainerStream: Before if loop >> DotNet Runtime 
+2026-06-15T20:15:06.8789948+00:00 ContainerStream: DotNet Runtime 10.0Writing output script to '/opt/startup/startup.sh'
+2026-06-15T20:15:06.9258109+00:00 ContainerStream: Trying to find the startup DLL name...
+2026-06-15T20:15:06.9258856+00:00 ContainerStream: Found the startup D name: HealingAssigns.Api.dll
+2026-06-15T20:15:06.9258927+00:00 ContainerStream: Running the command: dotnet "HealingAssigns.Api.dll"
+2026-06-15T20:15:07.9870854+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[14]
+2026-06-15T20:15:07.9871636+00:00 ContainerStream:       Now listening on: http://[::]:8080
+2026-06-15T20:15:07.9900403+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[0]
+2026-06-15T20:15:07.9900597+00:00 ContainerStream:       Application started. Press Ctrl+C to shut down.
+2026-06-15T20:15:07.9930583+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[0]
+2026-06-15T20:15:07.9931252+00:00 ContainerStream:       Hosting environment: Development
+2026-06-15T20:15:07.9935248+00:00 ContainerStream: info: Microsoft.Hosting.Lifetime[0]
+2026-06-15T20:15:07.9935980+00:00 ContainerStream:       Content root path: /home/site/wwwroot
+2026-06-15T20:15:08.4324723+00:00 ContainerStream: warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+2026-06-15T20:15:08.4325560+00:00 ContainerStream:       Failed to determine the https port for redirect.
+2026-06-15T20:15:08.4646393+00:00 ContainerStatus: Site startup probe succeeded after 13.1554701 seconds.
+2026-06-15T20:15:08.5382096+00:00 ContainerStatus: State: Starting, Action: WarmUpProbeSucceeded, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site startup probe succeeded after 13.1554701 seconds., DetailsLevel: INFO
+2026-06-15T20:15:08.7281990+00:00 ContainerStatus: Site is running with deployment version: 06add8f0-9600-483c-a649-e1b5f2f7c71f
+2026-06-15T20:15:08.7305468+00:00 ContainerStatus: Site started.
+2026-06-15T20:15:08.7315053+00:00 ContainerStatus: State: Started, Action: None, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site started at 06/15/2026 20:15:08 (UTC), DetailsLevel: INFO
+2026-06-15T20:15:08.8619039+00:00 ContainerStatus: Site is running with patch version DOTNETCORE 10.0.7
