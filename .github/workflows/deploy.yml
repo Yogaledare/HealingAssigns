@@ -31,7 +31,7 @@ jobs:
           resourceGroupName: rg-healingassigns-dev
           template: infra/main.bicep
           parameters: >
-            infra/main.bicepparam
+            environment=dev
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
           failOnStdErr: false
 
