@@ -22,8 +22,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
-
 app.MapPost("/weatherforecast", async (WeatherService service) =>
 {
     var forecast = await service.GenerateAndSave();
