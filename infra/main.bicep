@@ -38,6 +38,12 @@ resource apiApp 'Microsoft.Web/sites@2023-12-01' = {
     siteConfig: {
       linuxFxVersion: 'DOTNETCORE|10.0'
       alwaysOn: false
+      appSettings: [
+        {
+          name: 'Cors__AllowedOrigins__0'
+          value: 'https://${staticWebApp.properties.defaultHostname}'
+        }
+      ]
       connectionStrings: [
         {
           name: 'DefaultConnection'
