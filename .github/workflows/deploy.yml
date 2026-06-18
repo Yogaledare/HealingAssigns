@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       apiAppName: ${{ steps.deploy.outputs.apiAppName }}
+      staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
     steps:
       - uses: actions/checkout@v4
 
@@ -64,3 +65,42 @@ jobs:
         with:
           app-name: ${{ needs.deploy-infra.outputs.apiAppName }}
           package: HealingAssigns.backend/publish
+
+  deploy-frontend:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: HealingAssigns.frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install and Build
+        run: npm ci && npm run build
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get SWA deployment token
+        id: swa-token
+        run: |
+          TOKEN=$(az staticwebapp secrets list --name ${{ needs.deploy-infra.outputs.staticWebAppName }} --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
+          action: upload
+          skip_app_build: true
+          app_location: HealingAssigns.frontend/dist
