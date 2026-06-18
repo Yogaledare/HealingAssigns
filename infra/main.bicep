@@ -88,7 +88,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
 
 resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   name: 'swa-${suffix}'
-  location: location
+  location: 'westeurope'
   sku: {
     name: 'Free'
     tier: 'Free'
