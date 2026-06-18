@@ -1,8 +1,12 @@
 using HealingAssigns.Api;
 using HealingAssigns.Sql;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) =>
+    config.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<HealingAssignsDb>(options =>
