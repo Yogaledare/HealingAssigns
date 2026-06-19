@@ -11,6 +11,9 @@ param location string = resourceGroup().location
 @secure()
 param sqlAdminPassword string
 
+@description('Google OAuth Client ID')
+param googleClientId string
+
 var appName = 'healingassigns'
 var suffix = '${appName}-${environment}'
 
@@ -42,6 +45,10 @@ resource apiApp 'Microsoft.Web/sites@2023-12-01' = {
         {
           name: 'Cors__AllowedOrigins__0'
           value: 'https://${staticWebApp.properties.defaultHostname}'
+        }
+        {
+          name: 'Auth__Google__ClientId'
+          value: googleClientId
         }
       ]
       connectionStrings: [

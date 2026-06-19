@@ -34,6 +34,7 @@ jobs:
           parameters: >
             environment=dev
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+            googleClientId=${{ secrets.GOOGLE_CLIENT_ID }}
           failOnStdErr: false
 
   deploy-api:
