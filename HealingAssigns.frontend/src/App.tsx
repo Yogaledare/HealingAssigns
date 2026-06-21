@@ -4,6 +4,7 @@ import { useAuth } from './auth'
 import * as api from './api'
 import { RoleListPanel } from './components/RoleListPanel'
 import { EncounterPanel } from './components/EncounterPanel'
+import { Box, Button, Card, Flex, Heading, Link, Separator, Text } from '@radix-ui/themes'
 
 function App() {
   const { user, logout } = useAuth()
@@ -38,86 +39,72 @@ function App() {
 
   if (!selectedSessionId) {
     return (
-      <div className="min-h-screen p-8">
-        <div className="max-w-xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Healing Assigns</h1>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-base-content/60">{user.email}</span>
-              <button className="btn btn-ghost btn-sm" onClick={logout}>Sign out</button>
-            </div>
-          </div>
+      <Box maxWidth="560px" mx="auto" p="5">
+        <Flex justify="between" align="center" mb="5">
+          <Heading size="5">Healing Assigns</Heading>
+          <Flex align="center" gap="3">
+            <Text size="2" color="gray">{user.email}</Text>
+            <Link size="2" href="#" onClick={(e) => { e.preventDefault(); logout() }}>Sign out</Link>
+          </Flex>
+        </Flex>
 
-          <button className="btn btn-primary mb-6" onClick={handleNewSession}>
-            New Session
-          </button>
+        <Button mb="4" onClick={handleNewSession}>New Session</Button>
 
-          <div className="flex flex-col gap-2">
-            {sessions?.map((s) => (
-              <button
-                key={s.id}
-                className="card bg-base-200 shadow cursor-pointer hover:bg-base-300 transition-colors"
-                onClick={() => setSelectedSessionId(s.id)}
-              >
-                <div className="card-body p-4 flex-row items-center justify-between">
-                  <span className="font-semibold">{s.name}</span>
-                  <span className="text-sm text-base-content/50">
+        <Flex direction="column" gap="2">
+          {sessions?.map((s) => (
+            <Card key={s.id} asChild>
+              <button onClick={() => setSelectedSessionId(s.id)} style={{ cursor: 'pointer', textAlign: 'left' }}>
+                <Flex justify="between" align="center">
+                  <Text weight="medium">{s.name}</Text>
+                  <Text size="2" color="gray">
                     {new Date(s.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
+                  </Text>
+                </Flex>
               </button>
-            ))}
-            {sessions?.length === 0 && (
-              <p className="text-base-content/50 text-center py-12">
-                No sessions yet. Create one to get started.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
+            </Card>
+          ))}
+          {sessions?.length === 0 && (
+            <Text color="gray" align="center" my="9">
+              No sessions yet. Create one to get started.
+            </Text>
+          )}
+        </Flex>
+      </Box>
     )
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <Flex direction="column" style={{ minHeight: '100vh' }}>
       {/* Header */}
-      <div className="navbar bg-base-200 px-4">
-        <div className="flex-1 gap-2">
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => setSelectedSessionId(null)}
-          >
-            &larr; Sessions
-          </button>
-          <span className="font-bold text-lg">{session?.name}</span>
-        </div>
-        <div className="flex-none flex items-center gap-3">
-          <span className="text-sm text-base-content/60">{user.email}</span>
-          <button className="btn btn-ghost btn-sm" onClick={logout}>Sign out</button>
-        </div>
-      </div>
+      <Flex align="center" justify="between" px="4" py="2">
+        <Flex align="center" gap="2">
+          <Link size="2" href="#" onClick={(e) => { e.preventDefault(); setSelectedSessionId(null) }}>
+            ← Sessions
+          </Link>
+          <Text size="2" color="gray">/</Text>
+          <Text size="2" weight="medium">{session?.name}</Text>
+        </Flex>
+        <Flex align="center" gap="3">
+          <Text size="2" color="gray">{user.email}</Text>
+          <Link size="2" href="#" onClick={(e) => { e.preventDefault(); logout() }}>Sign out</Link>
+        </Flex>
+      </Flex>
+
+      <Separator size="4" />
 
       {/* Two-panel layout */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left: Encounters & Assignments */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {session && (
-            <EncounterPanel
-              session={session}
-            />
-          )}
-        </div>
+      <Flex flexGrow="1" style={{ overflow: 'hidden' }}>
+        <Box flexGrow="1" p="4" style={{ overflowY: 'auto' }}>
+          {session && <EncounterPanel session={session} />}
+        </Box>
 
-        {/* Right: Role Lists */}
-        <div className="w-80 border-l border-base-300 overflow-y-auto p-4">
-          {session && (
-            <RoleListPanel
-              session={session}
-            />
-          )}
-        </div>
-      </div>
-    </div>
+        <Separator orientation="vertical" size="4" />
+
+        <Box width="340px" flexShrink="0" p="4" style={{ overflowY: 'auto' }}>
+          {session && <RoleListPanel session={session} />}
+        </Box>
+      </Flex>
+    </Flex>
   )
 }
 

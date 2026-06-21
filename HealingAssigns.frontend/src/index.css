@@ -1,4 +1,1 @@
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes: dim --default;
-}
+@import "@radix-ui/themes/styles.css";

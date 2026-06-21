@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import { GoogleOAuthProvider, GoogleLogin, type CredentialResponse } from '@react-oauth/google'
 import { setAuthToken } from './api'
+import { Dialog, Flex, Heading, Text } from '@radix-ui/themes'
 
 interface AuthState {
   token: string
@@ -53,17 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <AuthContext.Provider value={{ user, logout }}>
         {children}
       </AuthContext.Provider>
-      {!user && (
-        <div className="fixed inset-0 bg-base-300/80 flex items-center justify-center z-50">
-          <div className="card bg-base-100 shadow-xl p-8 text-center">
-            <h1 className="text-2xl font-bold mb-2">Healing Assigns</h1>
-            <p className="text-base-content/60 mb-6">Sign in to manage raid assignments</p>
-            <div className="flex justify-center">
-              <GoogleLogin onSuccess={handleLogin} />
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog.Root open={!user}>
+        <Dialog.Content maxWidth="360px">
+          <Flex direction="column" align="center" gap="3">
+            <Heading size="5">Healing Assigns</Heading>
+            <Text color="gray">Sign in to manage raid assignments</Text>
+            <GoogleLogin onSuccess={handleLogin} />
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
     </GoogleOAuthProvider>
   )
 }

@@ -2,6 +2,17 @@ import { useState, useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Session } from '../api'
 import * as api from '../api'
+import { readableColor } from '../lib/color'
+import {
+  Box,
+  Button,
+  Card,
+  Flex,
+  Heading,
+  IconButton,
+  Text,
+  TextField,
+} from '@radix-ui/themes'
 
 const WOW_CLASSES = [
   { name: 'Druid', color: '#FF7C0A' },
@@ -15,7 +26,7 @@ const WOW_CLASSES = [
   { name: 'Warrior', color: '#C69B6D' },
 ]
 
-export const ROLE_ICONS = [
+const ROLE_ICONS = [
   { value: '🩹', label: 'Healer' },
   { value: '🛡️', label: 'Tank' },
   { value: '⚔️', label: 'DPS' },
@@ -77,58 +88,58 @@ export function RoleListPanel({ session }: { session: Session }) {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-bold text-lg">Role Lists</h2>
-        <button className="btn btn-primary btn-xs" onClick={() => setShowAddForm(!showAddForm)}>+ List</button>
-      </div>
+    <Flex direction="column" gap="3">
+      <Flex justify="between" align="center">
+        <Heading size="3">Role Lists</Heading>
+        <Button size="1" onClick={() => setShowAddForm(!showAddForm)}>+ List</Button>
+      </Flex>
 
       {showAddForm && (
-        <div className="card bg-base-200 p-3 mb-3">
-          <div className="flex gap-1">
+        <Card>
+          <Flex gap="2">
             <select
-              className="select select-xs select-bordered w-16"
               value={newListIcon}
               onChange={(e) => setNewListIcon(e.target.value)}
+              style={{ padding: '4px 8px', borderRadius: 'var(--radius-2)', border: '1px solid var(--gray-6)', width: 80 }}
             >
               <option value="">Icon</option>
               {ROLE_ICONS.map((icon) => (
                 <option key={icon.value} value={icon.value}>{icon.value} {icon.label}</option>
               ))}
             </select>
-            <input
-              className="input input-xs input-bordered flex-1"
-              placeholder="List name"
-              value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddList()}
-              autoFocus
-            />
-            <button className="btn btn-xs btn-primary" onClick={handleAddList}>Add</button>
-          </div>
-        </div>
+            <Box flexGrow="1">
+              <TextField.Root
+                size="1"
+                placeholder="List name"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddList()}
+                autoFocus
+              />
+            </Box>
+            <Button size="1" onClick={handleAddList}>Add</Button>
+          </Flex>
+        </Card>
       )}
 
       {session.roleLists.length === 0 && !showAddForm && (
-        <p className="text-base-content/50 text-sm">No role lists yet.</p>
+        <Text color="gray">No role lists yet.</Text>
       )}
 
-      <div className="flex flex-col gap-4">
-        {session.roleLists.map((list) => (
-          <RoleListCard
-            key={list.id}
-            list={list}
-            onAddSlot={(playerName, className, classColor) =>
-              addSlot.mutate({ roleListId: list.id, playerName, className, classColor })
-            }
-            onRemoveSlot={(id) => removeSlot.mutate(id)}
-            onRemoveList={() => removeList.mutate(list.id)}
-            onUpdateIcon={(icon) => updateList.mutate({ id: list.id, name: list.name, icon })}
-            onReorder={(slotIds) => reorderSlots.mutate({ roleListId: list.id, slotIds })}
-          />
-        ))}
-      </div>
-    </div>
+      {session.roleLists.map((list) => (
+        <RoleListCard
+          key={list.id}
+          list={list}
+          onAddSlot={(playerName, className, classColor) =>
+            addSlot.mutate({ roleListId: list.id, playerName, className, classColor })
+          }
+          onRemoveSlot={(id) => removeSlot.mutate(id)}
+          onRemoveList={() => removeList.mutate(list.id)}
+          onUpdateIcon={(icon) => updateList.mutate({ id: list.id, name: list.name, icon })}
+          onReorder={(slotIds) => reorderSlots.mutate({ roleListId: list.id, slotIds })}
+        />
+      ))}
+    </Flex>
   )
 }
 
@@ -160,22 +171,11 @@ function RoleListCard({
     setNewClass('')
   }
 
-  const handleDragStart = (i: number) => {
-    dragIdx.current = i
-  }
-
-  const handleDragOver = (e: React.DragEvent, i: number) => {
-    e.preventDefault()
-    setDragOverIdx(i)
-  }
-
+  const handleDragStart = (i: number) => { dragIdx.current = i }
+  const handleDragOver = (e: React.DragEvent, i: number) => { e.preventDefault(); setDragOverIdx(i) }
   const handleDrop = (i: number) => {
     const from = dragIdx.current
-    if (from === null || from === i) {
-      dragIdx.current = null
-      setDragOverIdx(null)
-      return
-    }
+    if (from === null || from === i) { dragIdx.current = null; setDragOverIdx(null); return }
     const ids = list.slots.map((s) => s.id)
     const [moved] = ids.splice(from, 1)
     ids.splice(i, 0, moved)
@@ -183,81 +183,78 @@ function RoleListCard({
     dragIdx.current = null
     setDragOverIdx(null)
   }
-
-  const handleDragEnd = () => {
-    dragIdx.current = null
-    setDragOverIdx(null)
-  }
+  const handleDragEnd = () => { dragIdx.current = null; setDragOverIdx(null) }
 
   return (
-    <div className="card bg-base-200 p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1">
+    <Card>
+      <Flex justify="between" align="center" mb="2">
+        <Flex align="center" gap="1">
           <select
-            className="select select-xs w-12 bg-transparent border-none p-0 text-base"
             value={list.icon ?? ''}
             onChange={(e) => onUpdateIcon(e.target.value || null)}
+            style={{ border: 'none', background: 'transparent', padding: 0, fontSize: 14, cursor: 'pointer', width: 32 }}
           >
             <option value="">—</option>
             {ROLE_ICONS.map((icon) => (
               <option key={icon.value} value={icon.value}>{icon.value}</option>
             ))}
           </select>
-          <h3 className="font-semibold text-sm">{list.name}</h3>
-        </div>
-        <button className="btn btn-ghost btn-xs text-error" onClick={onRemoveList}>×</button>
-      </div>
+          <Heading size="2">{list.name}</Heading>
+        </Flex>
+        <IconButton variant="ghost" color="gray" size="1" onClick={onRemoveList}>×</IconButton>
+      </Flex>
 
-      <ol className="flex flex-col gap-0 mb-2">
+      <Flex direction="column" gap="0" mb="2">
         {list.slots.map((slot, i) => (
-          <li
+          <Flex
             key={slot.id}
-            className={`flex items-center gap-2 text-sm py-1 px-1 rounded cursor-grab active:cursor-grabbing ${
-              dragOverIdx === i ? 'border-t-2 border-primary' : 'border-t-2 border-transparent'
-            }`}
+            align="center"
+            gap="2"
+            py="1"
+            px="1"
             draggable
             onDragStart={() => handleDragStart(i)}
             onDragOver={(e) => handleDragOver(e, i)}
             onDrop={() => handleDrop(i)}
             onDragEnd={handleDragEnd}
+            style={{
+              cursor: 'grab',
+              borderRadius: 'var(--radius-1)',
+              borderTop: dragOverIdx === i ? '2px solid var(--accent-9)' : '2px solid transparent',
+            }}
           >
-            <span className="text-base-content/40 w-4 text-right select-none">{i + 1}.</span>
-            <span
-              className="font-medium flex-1"
-              style={{ color: slot.classColor ?? undefined }}
-            >
+            <Text size="1" color="gray" style={{ width: 20, textAlign: 'right', userSelect: 'none' }}>{i + 1}.</Text>
+            <Text size="2" weight="medium" style={{ flex: 1, color: readableColor(slot.classColor), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {slot.playerName}
-            </span>
-            {slot.className && (
-              <span className="text-xs text-base-content/40">{slot.className}</span>
-            )}
-            <button className="btn btn-ghost btn-xs text-error opacity-50 hover:opacity-100" onClick={() => onRemoveSlot(slot.id)}>
-              ×
-            </button>
-          </li>
+            </Text>
+            {slot.className && <Text size="1" color="gray">{slot.className}</Text>}
+            <IconButton variant="ghost" color="gray" size="1" onClick={() => onRemoveSlot(slot.id)}>×</IconButton>
+          </Flex>
         ))}
-      </ol>
+      </Flex>
 
-      <div className="flex gap-1">
-        <input
-          className="input input-xs input-bordered flex-1"
-          placeholder="Name"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-        />
+      <Flex gap="2" align="stretch">
+        <Box flexGrow="1">
+          <TextField.Root
+            size="1"
+            placeholder="Name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+          />
+        </Box>
         <select
-          className="select select-xs select-bordered w-24"
           value={newClass}
           onChange={(e) => setNewClass(e.target.value)}
+          style={{ padding: '4px 8px', borderRadius: 'var(--radius-2)', border: '1px solid var(--gray-6)', width: 90 }}
         >
           <option value="">Class</option>
           {WOW_CLASSES.map((c) => (
             <option key={c.name} value={c.name}>{c.name}</option>
           ))}
         </select>
-        <button className="btn btn-xs btn-primary" onClick={handleAdd}>+</button>
-      </div>
-    </div>
+        <Button size="1" onClick={handleAdd}>+</Button>
+      </Flex>
+    </Card>
   )
 }

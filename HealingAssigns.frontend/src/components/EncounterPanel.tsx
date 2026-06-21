@@ -1,7 +1,21 @@
-import { useState, useRef, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Session, Encounter, Assignment } from '../api'
 import * as api from '../api'
+import { readableColor } from '../lib/color'
+import {
+  Box,
+  Button,
+  Card,
+  Code,
+  DropdownMenu,
+  Flex,
+  Heading,
+  IconButton,
+  Separator,
+  Table,
+  Text,
+  TextField,
+} from '@radix-ui/themes'
 
 const RAID_SYMBOLS = [
   { name: 'Star', emoji: '⭐' },
@@ -35,18 +49,6 @@ function SlotSelect({
   onChange: (value: string) => void
   allowNone?: boolean
 }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
-
   const selected = (() => {
     const decoded = decodeSlot(value)
     if (!decoded) return null
@@ -55,51 +57,51 @@ function SlotSelect({
     return slot ? { slot, icon: list?.icon ?? null, position: decoded.position } : null
   })()
 
-  const select = (v: string) => {
-    onChange(v)
-    setOpen(false)
-  }
-
   return (
-    <div className="relative" ref={ref}>
-      <button
-        className="btn btn-xs btn-ghost w-full justify-start font-normal border border-base-300"
-        onClick={() => setOpen(!open)}
-      >
-        {selected ? <>{selected.icon ?? ''}{selected.icon ? ' ' : ''}#{selected.position} <span className="text-base-content/40 ml-1" style={{ color: selected.slot.classColor ?? undefined }}>({selected.slot.playerName})</span></> : '—'}
-      </button>
-      {open && (
-        <div className="absolute z-50 mt-1 bg-base-100 border border-base-300 rounded shadow-lg max-h-60 overflow-y-auto min-w-40">
-          {allowNone && (
-            <div
-              className="px-3 py-1 cursor-pointer hover:bg-base-200 text-sm"
-              onClick={() => select('')}
-            >—</div>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        <Button variant="outline" color="gray" size="1" style={{ width: '100%', justifyContent: 'flex-start', fontWeight: 'normal' }}>
+          {selected ? (
+            <>
+              {selected.icon ?? ''}
+              {selected.icon ? ' ' : ''}
+              #{selected.position}{' '}
+              <Text size="1" color="gray" style={{ color: readableColor(selected.slot.classColor) }}>
+                ({selected.slot.playerName})
+              </Text>
+            </>
+          ) : (
+            <Text color="gray">—</Text>
           )}
-          {roleLists.map((list) => (
-            <div key={list.id}>
-              <div className="px-3 py-1 text-xs font-bold text-base-content/50 uppercase tracking-wide">
-                {list.icon && <span className="mr-1">{list.icon}</span>}{list.name}
-              </div>
-              {list.slots.length === 0 && (
-                <div className="px-3 py-1 text-xs text-base-content/30 italic">(empty)</div>
-              )}
-              {list.slots.map((slot, i) => (
-                <div
-                  key={slot.id}
-                  className={`px-3 py-1 cursor-pointer hover:bg-base-200 text-sm ${
-                    value === encodeSlot(list.id, i + 1) ? 'bg-base-200' : ''
-                  }`}
-                  onClick={() => select(encodeSlot(list.id, i + 1))}
-                >
-                  {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1} <span className="text-base-content/40" style={{ color: slot.classColor ?? undefined }}>({slot.playerName})</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        </Button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content>
+        {allowNone && (
+          <DropdownMenu.Item onSelect={() => onChange('')}>—</DropdownMenu.Item>
+        )}
+        {roleLists.map((list) => (
+          <DropdownMenu.Group key={list.id}>
+            <DropdownMenu.Label>
+              {list.icon && <>{list.icon} </>}{list.name}
+            </DropdownMenu.Label>
+            {list.slots.length === 0 && (
+              <DropdownMenu.Item disabled>(empty)</DropdownMenu.Item>
+            )}
+            {list.slots.map((slot, i) => (
+              <DropdownMenu.Item
+                key={slot.id}
+                onSelect={() => onChange(encodeSlot(list.id, i + 1))}
+              >
+                {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1}{' '}
+                <Text size="1" color="gray" style={{ color: readableColor(slot.classColor) }}>
+                  ({slot.playerName})
+                </Text>
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.Group>
+        ))}
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
   )
 }
 
@@ -123,29 +125,27 @@ export function EncounterPanel({ session }: { session: Session }) {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-lg">Encounters</h2>
-        <button className="btn btn-primary btn-sm" onClick={handleAdd}>+ Encounter</button>
-      </div>
+    <Flex direction="column" gap="4">
+      <Flex justify="between" align="center">
+        <Heading size="4">Encounters</Heading>
+        <Button onClick={handleAdd}>+ Encounter</Button>
+      </Flex>
 
       {session.encounters.length === 0 && (
-        <p className="text-base-content/50 text-center py-12">
+        <Text color="gray" align="center" my="9">
           No encounters yet. Add one to start assigning.
-        </p>
+        </Text>
       )}
 
-      <div className="flex flex-col gap-6">
-        {session.encounters.map((encounter) => (
-          <EncounterCard
-            key={encounter.id}
-            encounter={encounter}
-            session={session}
-            onRemove={() => removeEncounter.mutate(encounter.id)}
-          />
-        ))}
-      </div>
-    </div>
+      {session.encounters.map((encounter) => (
+        <EncounterCard
+          key={encounter.id}
+          encounter={encounter}
+          session={session}
+          onRemove={() => removeEncounter.mutate(encounter.id)}
+        />
+      ))}
+    </Flex>
   )
 }
 
@@ -190,53 +190,55 @@ function EncounterCard({
   })
 
   const canAdd = session.roleLists.length > 0
-
   const macroText = buildMacro(encounter, session)
 
   return (
-    <div className="card bg-base-200">
-      <div className="card-body p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold">{encounter.name}</h3>
-          <button className="btn btn-ghost btn-xs text-error" onClick={onRemove}>Delete</button>
-        </div>
+    <Card>
+      <Flex justify="between" align="center" mb="3">
+        <Heading size="3">{encounter.name}</Heading>
+        <Button variant="ghost" color="red" size="1" onClick={onRemove}>Delete</Button>
+      </Flex>
 
-        <table className="table table-xs">
-          <thead>
-            <tr>
-              <th className="w-28">Symbol</th>
-              <th className="w-24">Desc</th>
-              <th>Assignee</th>
-              <th>Target</th>
-              <th className="w-8"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {encounter.assignments.map((a) => (
-              <AssignmentRow
-                key={a.id}
-                assignment={a}
-                session={session}
-                onUpdate={(updated) => updateAssignment.mutate(updated)}
-                onRemove={() => removeAssignment.mutate(a.id)}
-              />
-            ))}
-          </tbody>
-        </table>
+      <Table.Root style={{ tableLayout: 'fixed' }}>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeaderCell width="120px">Symbol</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Desc</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell width="25%">Assignee</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell width="25%">Target</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell width="40px"></Table.ColumnHeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {encounter.assignments.map((a) => (
+            <AssignmentRow
+              key={a.id}
+              assignment={a}
+              session={session}
+              onUpdate={(updated) => updateAssignment.mutate(updated)}
+              onRemove={() => removeAssignment.mutate(a.id)}
+            />
+          ))}
+        </Table.Body>
+      </Table.Root>
 
-        {canAdd && (
-          <button
-            className="btn btn-xs btn-ghost btn-block mt-1"
-            onClick={() => addAssignment.mutate()}
-            disabled={addAssignment.isPending}
-          >+</button>
-        )}
+      {canAdd && (
+        <Button
+          variant="ghost"
+          size="1"
+          style={{ width: '100%' }}
+          mt="2"
+          onClick={() => addAssignment.mutate()}
+          disabled={addAssignment.isPending}
+        >
+          + Add row
+        </Button>
+      )}
 
-        {encounter.assignments.length > 0 && (
-          <MacroOutput text={macroText} />
-        )}
-      </div>
-    </div>
+      {encounter.assignments.length > 0 && (
+        <MacroOutput text={macroText} />
+      )}
+    </Card>
   )
 }
 
@@ -261,27 +263,27 @@ function AssignmentRow({
     : ''
 
   return (
-    <tr>
-      <td>
+    <Table.Row>
+      <Table.Cell>
         <select
-          className="select select-xs select-bordered w-full"
           value={assignment.symbol}
           onChange={(e) => handleChange({ symbol: e.target.value })}
+          style={{ padding: '4px 8px', borderRadius: 'var(--radius-2)', border: '1px solid var(--gray-6)', verticalAlign: 'middle' }}
         >
           {RAID_SYMBOLS.map((s) => (
             <option key={s.name} value={s.name}>{s.emoji} {s.name}</option>
           ))}
         </select>
-      </td>
-      <td>
-        <input
-          className="input input-xs input-bordered w-full"
+      </Table.Cell>
+      <Table.Cell>
+        <TextField.Root
+          size="1"
           value={assignment.description ?? ''}
           placeholder="—"
           onChange={(e) => handleChange({ description: e.target.value || null })}
         />
-      </td>
-      <td>
+      </Table.Cell>
+      <Table.Cell>
         <SlotSelect
           roleLists={session.roleLists}
           value={assigneeValue}
@@ -290,8 +292,8 @@ function AssignmentRow({
             if (slot) handleChange({ assigneeRoleListId: slot.roleListId, assigneePosition: slot.position })
           }}
         />
-      </td>
-      <td>
+      </Table.Cell>
+      <Table.Cell>
         <SlotSelect
           roleLists={session.roleLists}
           value={targetValue}
@@ -305,39 +307,37 @@ function AssignmentRow({
             }
           }}
         />
-      </td>
-      <td>
-        <button className="btn btn-ghost btn-xs text-error" onClick={onRemove}>×</button>
-      </td>
-    </tr>
+      </Table.Cell>
+      <Table.Cell align="center">
+        <IconButton variant="ghost" color="red" size="1" onClick={onRemove}>
+          ×
+        </IconButton>
+      </Table.Cell>
+    </Table.Row>
   )
 }
 
 function MacroOutput({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false)
   const tooLong = text.length > 255
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className="mt-3">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold">
+    <Box mt="3">
+      <Separator size="4" mb="3" />
+      <Flex justify="between" align="center" mb="2">
+        <Text size="1" color="gray">
           Macro ({text.length}/255)
-          {tooLong && <span className="text-error ml-1">Too long!</span>}
-        </span>
-        <button className="btn btn-xs btn-ghost" onClick={handleCopy}>
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
-      </div>
-      <pre className={`text-xs bg-base-300 p-2 rounded whitespace-pre-wrap break-all ${tooLong ? 'border border-error' : ''}`}>
+          {tooLong && <Text color="red" ml="1">Too long!</Text>}
+        </Text>
+        <Button variant="ghost" size="1" onClick={handleCopy}>Copy</Button>
+      </Flex>
+      <Code size="1" style={{ display: 'block', whiteSpace: 'pre-wrap', wordBreak: 'break-all', padding: 'var(--space-2)', outline: tooLong ? '2px solid var(--red-9)' : undefined }}>
         {text}
-      </pre>
-    </div>
+      </Code>
+    </Box>
   )
 }
 
