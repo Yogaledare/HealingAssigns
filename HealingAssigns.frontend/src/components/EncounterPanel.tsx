@@ -61,39 +61,46 @@ function SlotSelect({
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="position-relative" ref={ref}>
       <button
-        className="btn btn-xs btn-ghost w-full justify-start font-normal border border-base-300"
+        className="btn btn-outline-secondary btn-sm w-100 text-start"
         onClick={() => setOpen(!open)}
       >
-        {selected ? <>{selected.icon ?? ''}{selected.icon ? ' ' : ''}#{selected.position} <span className="text-base-content/40 ml-1" style={{ color: selected.slot.classColor ?? undefined }}>({selected.slot.playerName})</span></> : '—'}
+        {selected ? (
+          <>
+            {selected.icon ?? ''}
+            {selected.icon ? ' ' : ''}
+            #{selected.position}{' '}
+            <span style={{ color: selected.slot.classColor ?? undefined, opacity: 0.7 }}>
+              ({selected.slot.playerName})
+            </span>
+          </>
+        ) : '—'}
       </button>
       {open && (
-        <div className="absolute z-50 mt-1 bg-base-100 border border-base-300 rounded shadow-lg max-h-60 overflow-y-auto min-w-40">
+        <div className="position-absolute z-3 mt-1 bg-white border rounded shadow-sm overflow-auto" style={{ maxHeight: 240, minWidth: 180 }}>
           {allowNone && (
-            <div
-              className="px-3 py-1 cursor-pointer hover:bg-base-200 text-sm"
-              onClick={() => select('')}
-            >—</div>
+            <button className="dropdown-item" onClick={() => select('')}>—</button>
           )}
           {roleLists.map((list) => (
             <div key={list.id}>
-              <div className="px-3 py-1 text-xs font-bold text-base-content/50 uppercase tracking-wide">
-                {list.icon && <span className="mr-1">{list.icon}</span>}{list.name}
-              </div>
+              <h6 className="dropdown-header">
+                {list.icon && <span className="me-1">{list.icon}</span>}{list.name}
+              </h6>
               {list.slots.length === 0 && (
-                <div className="px-3 py-1 text-xs text-base-content/30 italic">(empty)</div>
+                <span className="dropdown-item-text text-secondary fst-italic small">(empty)</span>
               )}
               {list.slots.map((slot, i) => (
-                <div
+                <button
                   key={slot.id}
-                  className={`px-3 py-1 cursor-pointer hover:bg-base-200 text-sm ${
-                    value === encodeSlot(list.id, i + 1) ? 'bg-base-200' : ''
-                  }`}
+                  className={`dropdown-item small ${value === encodeSlot(list.id, i + 1) ? 'active' : ''}`}
                   onClick={() => select(encodeSlot(list.id, i + 1))}
                 >
-                  {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1} <span className="text-base-content/40" style={{ color: slot.classColor ?? undefined }}>({slot.playerName})</span>
-                </div>
+                  {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1}{' '}
+                  <span style={{ color: value === encodeSlot(list.id, i + 1) ? undefined : (slot.classColor ?? undefined), opacity: 0.7 }}>
+                    ({slot.playerName})
+                  </span>
+                </button>
               ))}
             </div>
           ))}
@@ -124,18 +131,18 @@ export function EncounterPanel({ session }: { session: Session }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-lg">Encounters</h2>
+      <div className="d-flex align-items-center justify-content-between mb-3">
+        <h5 className="mb-0">Encounters</h5>
         <button className="btn btn-primary btn-sm" onClick={handleAdd}>+ Encounter</button>
       </div>
 
       {session.encounters.length === 0 && (
-        <p className="text-base-content/50 text-center py-12">
+        <p className="text-secondary text-center py-5">
           No encounters yet. Add one to start assigning.
         </p>
       )}
 
-      <div className="flex flex-col gap-6">
+      <div className="d-flex flex-column gap-3">
         {session.encounters.map((encounter) => (
           <EncounterCard
             key={encounter.id}
@@ -190,25 +197,24 @@ function EncounterCard({
   })
 
   const canAdd = session.roleLists.length > 0
-
   const macroText = buildMacro(encounter, session)
 
   return (
-    <div className="card bg-base-200">
-      <div className="card-body p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold">{encounter.name}</h3>
-          <button className="btn btn-ghost btn-xs text-error" onClick={onRemove}>Delete</button>
+    <div className="card">
+      <div className="card-body p-3">
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <h6 className="card-title mb-0 fw-bold">{encounter.name}</h6>
+          <button className="btn btn-link btn-sm text-danger text-decoration-none p-0" onClick={onRemove}>Delete</button>
         </div>
 
-        <table className="table table-xs">
+        <table className="table table-sm table-borderless align-middle mb-1">
           <thead>
             <tr>
-              <th className="w-28">Symbol</th>
-              <th className="w-24">Desc</th>
-              <th>Assignee</th>
-              <th>Target</th>
-              <th className="w-8"></th>
+              <th className="col-2">Symbol</th>
+              <th className="col-2">Desc</th>
+              <th className="col-3">Assignee</th>
+              <th className="col-3">Target</th>
+              <th className="col-auto"></th>
             </tr>
           </thead>
           <tbody>
@@ -226,10 +232,10 @@ function EncounterCard({
 
         {canAdd && (
           <button
-            className="btn btn-xs btn-ghost btn-block mt-1"
+            className="btn btn-outline-secondary btn-sm w-100"
             onClick={() => addAssignment.mutate()}
             disabled={addAssignment.isPending}
-          >+</button>
+          >+ Add row</button>
         )}
 
         {encounter.assignments.length > 0 && (
@@ -264,7 +270,7 @@ function AssignmentRow({
     <tr>
       <td>
         <select
-          className="select select-xs select-bordered w-full"
+          className="form-select form-select-sm"
           value={assignment.symbol}
           onChange={(e) => handleChange({ symbol: e.target.value })}
         >
@@ -275,7 +281,7 @@ function AssignmentRow({
       </td>
       <td>
         <input
-          className="input input-xs input-bordered w-full"
+          className="form-control form-control-sm"
           value={assignment.description ?? ''}
           placeholder="—"
           onChange={(e) => handleChange({ description: e.target.value || null })}
@@ -306,8 +312,8 @@ function AssignmentRow({
           }}
         />
       </td>
-      <td>
-        <button className="btn btn-ghost btn-xs text-error" onClick={onRemove}>×</button>
+      <td className="text-center">
+        <button className="btn btn-link btn-sm text-danger text-decoration-none p-0" onClick={onRemove}>&times;</button>
       </td>
     </tr>
   )
@@ -325,16 +331,16 @@ function MacroOutput({ text }: { text: string }) {
 
   return (
     <div className="mt-3">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-semibold">
+      <div className="d-flex align-items-center justify-content-between mb-1">
+        <small className="fw-semibold">
           Macro ({text.length}/255)
-          {tooLong && <span className="text-error ml-1">Too long!</span>}
-        </span>
-        <button className="btn btn-xs btn-ghost" onClick={handleCopy}>
+          {tooLong && <span className="text-danger ms-1">Too long!</span>}
+        </small>
+        <button className="btn btn-link btn-sm text-decoration-none p-0" onClick={handleCopy}>
           {copied ? 'Copied!' : 'Copy'}
         </button>
       </div>
-      <pre className={`text-xs bg-base-300 p-2 rounded whitespace-pre-wrap break-all ${tooLong ? 'border border-error' : ''}`}>
+      <pre className={`bg-light border rounded p-2 small mb-0 ${tooLong ? 'border-danger' : ''}`} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
         {text}
       </pre>
     </div>

@@ -54,11 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         {children}
       </AuthContext.Provider>
       {!user && (
-        <div className="fixed inset-0 bg-base-300/80 flex items-center justify-center z-50">
-          <div className="card bg-base-100 shadow-xl p-8 text-center">
-            <h1 className="text-2xl font-bold mb-2">Healing Assigns</h1>
-            <p className="text-base-content/60 mb-6">Sign in to manage raid assignments</p>
-            <div className="flex justify-center">
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+          <div className="card shadow-lg p-4 text-center">
+            <h1 className="h3 mb-2">Healing Assigns</h1>
+            <p className="text-secondary mb-4">Sign in to manage raid assignments</p>
+            <div className="d-flex justify-content-center">
               <GoogleLogin onSuccess={handleLogin} />
             </div>
           </div>

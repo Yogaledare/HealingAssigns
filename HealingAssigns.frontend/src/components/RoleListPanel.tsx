@@ -1,7 +1,27 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+  defaultAnimateLayoutChanges,
+  type AnimateLayoutChanges,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Session } from '../api'
 import * as api from '../api'
+import { readableColor } from '../lib/color'
 
 const WOW_CLASSES = [
   { name: 'Druid', color: '#FF7C0A' },
@@ -61,8 +81,23 @@ export function RoleListPanel({ session }: { session: Session }) {
   const reorderSlots = useMutation({
     mutationFn: (args: { roleListId: number; slotIds: number[] }) =>
       api.reorderSlots(args.roleListId, args.slotIds),
-    onSuccess: invalidate,
+    onSettled: invalidate,
   })
+
+  const handleReorder = (roleListId: number, slotIds: number[]) => {
+    queryClient.setQueryData<Session>(['session', session.id], (old) => {
+      if (!old) return old
+      return {
+        ...old,
+        roleLists: old.roleLists.map((rl) => {
+          if (rl.id !== roleListId) return rl
+          const slotMap = new Map(rl.slots.map((s) => [s.id, s]))
+          return { ...rl, slots: slotIds.map((id) => slotMap.get(id)!) }
+        }),
+      }
+    })
+    reorderSlots.mutate({ roleListId, slotIds })
+  }
 
   const [newListName, setNewListName] = useState('')
   const [newListIcon, setNewListIcon] = useState('')
@@ -78,42 +113,45 @@ export function RoleListPanel({ session }: { session: Session }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-bold text-lg">Role Lists</h2>
-        <button className="btn btn-primary btn-xs" onClick={() => setShowAddForm(!showAddForm)}>+ List</button>
+      <div className="d-flex align-items-center justify-content-between mb-3">
+        <h5 className="mb-0">Role Lists</h5>
+        <button className="btn btn-primary btn-sm" onClick={() => setShowAddForm(!showAddForm)}>+ List</button>
       </div>
 
       {showAddForm && (
-        <div className="card bg-base-200 p-3 mb-3">
-          <div className="flex gap-1">
-            <select
-              className="select select-xs select-bordered w-16"
-              value={newListIcon}
-              onChange={(e) => setNewListIcon(e.target.value)}
-            >
-              <option value="">Icon</option>
-              {ROLE_ICONS.map((icon) => (
-                <option key={icon.value} value={icon.value}>{icon.value} {icon.label}</option>
-              ))}
-            </select>
-            <input
-              className="input input-xs input-bordered flex-1"
-              placeholder="List name"
-              value={newListName}
-              onChange={(e) => setNewListName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddList()}
-              autoFocus
-            />
-            <button className="btn btn-xs btn-primary" onClick={handleAddList}>Add</button>
+        <div className="card mb-3">
+          <div className="card-body p-2">
+            <div className="input-group input-group-sm">
+              <select
+                className="form-select"
+                value={newListIcon}
+                onChange={(e) => setNewListIcon(e.target.value)}
+                style={{ maxWidth: 80 }}
+              >
+                <option value="">Icon</option>
+                {ROLE_ICONS.map((icon) => (
+                  <option key={icon.value} value={icon.value}>{icon.value} {icon.label}</option>
+                ))}
+              </select>
+              <input
+                className="form-control"
+                placeholder="List name"
+                value={newListName}
+                onChange={(e) => setNewListName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddList()}
+                autoFocus
+              />
+              <button className="btn btn-primary" onClick={handleAddList}>Add</button>
+            </div>
           </div>
         </div>
       )}
 
       {session.roleLists.length === 0 && !showAddForm && (
-        <p className="text-base-content/50 text-sm">No role lists yet.</p>
+        <p className="text-secondary small">No role lists yet.</p>
       )}
 
-      <div className="flex flex-col gap-4">
+      <div className="d-flex flex-column gap-3">
         {session.roleLists.map((list) => (
           <RoleListCard
             key={list.id}
@@ -124,10 +162,69 @@ export function RoleListPanel({ session }: { session: Session }) {
             onRemoveSlot={(id) => removeSlot.mutate(id)}
             onRemoveList={() => removeList.mutate(list.id)}
             onUpdateIcon={(icon) => updateList.mutate({ id: list.id, name: list.name, icon })}
-            onReorder={(slotIds) => reorderSlots.mutate({ roleListId: list.id, slotIds })}
+            onReorder={(slotIds) => handleReorder(list.id, slotIds)}
           />
         ))}
       </div>
+    </div>
+  )
+}
+
+function SlotBadge({ slot }: { slot: api.RoleSlot }) {
+  return (
+    <span
+      className="badge rounded-pill px-2 py-1 text-start"
+      style={{
+        backgroundColor: slot.classColor ?? '#6c757d',
+        color: slot.classColor && readableColor(slot.classColor) === slot.classColor ? '#fff' : '#000',
+        fontSize: '0.8rem',
+      }}
+    >
+      {slot.playerName}
+    </span>
+  )
+}
+
+function SortableSlot({
+  slot,
+  onRemove,
+}: {
+  slot: api.RoleSlot
+  index: number
+  onRemove: () => void
+}) {
+  const noAnimateOnDrop: AnimateLayoutChanges = (args) =>
+    args.isSorting || args.wasDragging ? false : defaultAnimateLayoutChanges(args)
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: slot.id, animateLayoutChanges: noAnimateOnDrop })
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className="d-flex align-items-center gap-2 flex-grow-1"
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.3 : 1,
+        cursor: 'grab',
+      }}
+    >
+      <SlotBadge slot={slot} />
+      {slot.className && <small className="text-secondary">{slot.className}</small>}
+      <button
+        className="btn btn-link btn-sm text-danger text-decoration-none p-0 lh-1"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={onRemove}
+      >&times;</button>
     </div>
   )
 }
@@ -149,8 +246,11 @@ function RoleListCard({
 }) {
   const [newName, setNewName] = useState('')
   const [newClass, setNewClass] = useState('')
-  const dragIdx = useRef<number | null>(null)
-  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null)
+  const [activeId, setActiveId] = useState<number | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+  )
 
   const handleAdd = () => {
     if (!newName.trim()) return
@@ -160,103 +260,94 @@ function RoleListCard({
     setNewClass('')
   }
 
-  const handleDragStart = (i: number) => {
-    dragIdx.current = i
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number)
   }
 
-  const handleDragOver = (e: React.DragEvent, i: number) => {
-    e.preventDefault()
-    setDragOverIdx(i)
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = list.slots.findIndex((s) => s.id === active.id)
+    const newIndex = list.slots.findIndex((s) => s.id === over.id)
+    const reordered = arrayMove(list.slots.map((s) => s.id), oldIndex, newIndex)
+    onReorder(reordered)
   }
 
-  const handleDrop = (i: number) => {
-    const from = dragIdx.current
-    if (from === null || from === i) {
-      dragIdx.current = null
-      setDragOverIdx(null)
-      return
-    }
-    const ids = list.slots.map((s) => s.id)
-    const [moved] = ids.splice(from, 1)
-    ids.splice(i, 0, moved)
-    onReorder(ids)
-    dragIdx.current = null
-    setDragOverIdx(null)
-  }
-
-  const handleDragEnd = () => {
-    dragIdx.current = null
-    setDragOverIdx(null)
-  }
+  const activeSlot = activeId ? list.slots.find((s) => s.id === activeId) : null
 
   return (
-    <div className="card bg-base-200 p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-1">
+    <div className="card">
+      <div className="card-body p-3">
+        <div className="d-flex align-items-center justify-content-between mb-2">
+          <div className="d-flex align-items-center gap-1">
+            <select
+              className="form-select form-select-sm border-0 bg-transparent p-0"
+              value={list.icon ?? ''}
+              onChange={(e) => onUpdateIcon(e.target.value || null)}
+              style={{ width: 36 }}
+            >
+              <option value="">—</option>
+              {ROLE_ICONS.map((icon) => (
+                <option key={icon.value} value={icon.value}>{icon.value}</option>
+              ))}
+            </select>
+            <h6 className="mb-0 fw-semibold">{list.name}</h6>
+          </div>
+          <button className="btn btn-link btn-sm text-danger text-decoration-none p-0" onClick={onRemoveList}>&times;</button>
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={list.slots.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="mb-2">
+              {list.slots.map((slot, i) => (
+                <div key={slot.id} className="d-flex align-items-center gap-2 py-1">
+                  <span
+                    className="text-secondary fw-bold text-center"
+                    style={{ width: 24, fontSize: '0.85rem', userSelect: 'none' }}
+                  >
+                    {i + 1}
+                  </span>
+                  <SortableSlot
+                    slot={slot}
+                    index={i}
+                    onRemove={() => onRemoveSlot(slot.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </SortableContext>
+          <DragOverlay dropAnimation={null}>
+            {activeSlot && <SlotBadge slot={activeSlot} />}
+          </DragOverlay>
+        </DndContext>
+
+        <div className="input-group input-group-sm">
+          <input
+            className="form-control"
+            placeholder="Name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+          />
           <select
-            className="select select-xs w-12 bg-transparent border-none p-0 text-base"
-            value={list.icon ?? ''}
-            onChange={(e) => onUpdateIcon(e.target.value || null)}
+            className="form-select"
+            value={newClass}
+            onChange={(e) => setNewClass(e.target.value)}
+            style={{ maxWidth: 100 }}
           >
-            <option value="">—</option>
-            {ROLE_ICONS.map((icon) => (
-              <option key={icon.value} value={icon.value}>{icon.value}</option>
+            <option value="">Class</option>
+            {WOW_CLASSES.map((c) => (
+              <option key={c.name} value={c.name}>{c.name}</option>
             ))}
           </select>
-          <h3 className="font-semibold text-sm">{list.name}</h3>
+          <button className="btn btn-primary" onClick={handleAdd}>+</button>
         </div>
-        <button className="btn btn-ghost btn-xs text-error" onClick={onRemoveList}>×</button>
-      </div>
-
-      <ol className="flex flex-col gap-0 mb-2">
-        {list.slots.map((slot, i) => (
-          <li
-            key={slot.id}
-            className={`flex items-center gap-2 text-sm py-1 px-1 rounded cursor-grab active:cursor-grabbing ${
-              dragOverIdx === i ? 'border-t-2 border-primary' : 'border-t-2 border-transparent'
-            }`}
-            draggable
-            onDragStart={() => handleDragStart(i)}
-            onDragOver={(e) => handleDragOver(e, i)}
-            onDrop={() => handleDrop(i)}
-            onDragEnd={handleDragEnd}
-          >
-            <span className="text-base-content/40 w-4 text-right select-none">{i + 1}.</span>
-            <span
-              className="font-medium flex-1"
-              style={{ color: slot.classColor ?? undefined }}
-            >
-              {slot.playerName}
-            </span>
-            {slot.className && (
-              <span className="text-xs text-base-content/40">{slot.className}</span>
-            )}
-            <button className="btn btn-ghost btn-xs text-error opacity-50 hover:opacity-100" onClick={() => onRemoveSlot(slot.id)}>
-              ×
-            </button>
-          </li>
-        ))}
-      </ol>
-
-      <div className="flex gap-1">
-        <input
-          className="input input-xs input-bordered flex-1"
-          placeholder="Name"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-        />
-        <select
-          className="select select-xs select-bordered w-24"
-          value={newClass}
-          onChange={(e) => setNewClass(e.target.value)}
-        >
-          <option value="">Class</option>
-          {WOW_CLASSES.map((c) => (
-            <option key={c.name} value={c.name}>{c.name}</option>
-          ))}
-        </select>
-        <button className="btn btn-xs btn-primary" onClick={handleAdd}>+</button>
       </div>
     </div>
   )
