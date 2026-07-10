@@ -1,3 +1,4 @@
+using HealingAssigns.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealingAssigns.Sql;
@@ -11,6 +12,7 @@ public class HealingAssignsDb : DbContext
     public DbSet<RoleSlot> RoleSlots => Set<RoleSlot>();
     public DbSet<Encounter> Encounters => Set<Encounter>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
+    public DbSet<Symbol> Symbols => Set<Symbol>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -37,5 +39,22 @@ public class HealingAssignsDb : DbContext
             .WithMany()
             .HasForeignKey(a => a.TargetRoleListId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Assignment>()
+            .HasOne(a => a.Symbol)
+            .WithMany()
+            .HasForeignKey(a => a.SymbolId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Symbol>().HasData(
+            new Symbol { Id = 1, Name = "Skull" },
+            new Symbol { Id = 2, Name = "Star" },
+            new Symbol { Id = 3, Name = "Circle" },
+            new Symbol { Id = 4, Name = "Diamond" },
+            new Symbol { Id = 5, Name = "Triangle" },
+            new Symbol { Id = 6, Name = "Square" },
+            new Symbol { Id = 7, Name = "Moon" },
+            new Symbol { Id = 8, Name = "Cross" }
+        );
     }
 }

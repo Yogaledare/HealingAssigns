@@ -1,10 +1,11 @@
-namespace HealingAssigns.Sql;
+namespace HealingAssigns.Sql.Entities;
 
 public class Assignment
 {
     public int Id { get; set; }
     public int EncounterId { get; set; }
-    public string Symbol { get; set; } = "";
+    public int? SymbolId { get; set; }
+    public Symbol? Symbol { get; set; }
     public string? Description { get; set; }
     public int AssigneeRoleListId { get; set; }
     public int AssigneePosition { get; set; }

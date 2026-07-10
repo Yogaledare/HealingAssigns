@@ -59,7 +59,7 @@ export interface Encounter {
 
 export interface Assignment {
   id: number
-  symbol: string
+  symbolId: number | null
   description: string | null
   assigneeRoleListId: number
   assigneePosition: number
@@ -177,7 +177,7 @@ export async function deleteEncounter(id: number): Promise<void> {
 // Assignments
 export async function createAssignment(
   encounterId: number,
-  symbol: string,
+  symbolId: number | null,
   description: string | null,
   assigneeRoleListId: number,
   assigneePosition: number,
@@ -186,14 +186,14 @@ export async function createAssignment(
 ): Promise<Assignment> {
   const res = await apiFetch(`/encounters/${encounterId}/assignments`, {
     method: 'POST',
-    body: JSON.stringify({ symbol, description, assigneeRoleListId, assigneePosition, targetRoleListId, targetPosition }),
+    body: JSON.stringify({ symbolId, description, assigneeRoleListId, assigneePosition, targetRoleListId, targetPosition }),
   })
   return res.json()
 }
 
 export async function updateAssignment(
   id: number,
-  symbol: string,
+  symbolId: number | null,
   description: string | null,
   assigneeRoleListId: number,
   assigneePosition: number,
@@ -202,7 +202,7 @@ export async function updateAssignment(
 ): Promise<Assignment> {
   const res = await apiFetch(`/assignments/${id}`, {
     method: 'PUT',
-    body: JSON.stringify({ symbol, description, assigneeRoleListId, assigneePosition, targetRoleListId, targetPosition }),
+    body: JSON.stringify({ symbolId, description, assigneeRoleListId, assigneePosition, targetRoleListId, targetPosition }),
   })
   return res.json()
 }

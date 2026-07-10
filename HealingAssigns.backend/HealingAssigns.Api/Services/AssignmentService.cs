@@ -1,4 +1,5 @@
 using HealingAssigns.Sql.Mapping;
+using HealingAssigns.Sql.Entities;
 using HealingAssigns.Contracts;
 using HealingAssigns.Sql;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ namespace HealingAssigns.Api.Services;
 
 public class AssignmentService(HealingAssignsDb db)
 {
-    public async Task<AssignmentDto> Create(int encounterId, string symbol, string? description,
+    public async Task<AssignmentDto> Create(int encounterId, int? symbolId, string? description,
         int assigneeRoleListId, int assigneePosition, int? targetRoleListId, int? targetPosition)
     {
         var maxSort = await db.Assignments
@@ -17,7 +18,7 @@ public class AssignmentService(HealingAssignsDb db)
         var assignment = new Assignment
         {
             EncounterId = encounterId,
-            Symbol = symbol,
+            SymbolId = symbolId,
             Description = description,
             AssigneeRoleListId = assigneeRoleListId,
             AssigneePosition = assigneePosition,
@@ -30,12 +31,12 @@ public class AssignmentService(HealingAssignsDb db)
         return assignment.ToDto();
     }
 
-    public async Task<AssignmentDto?> Update(int id, string symbol, string? description,
+    public async Task<AssignmentDto?> Update(int id, int? symbolId, string? description,
         int assigneeRoleListId, int assigneePosition, int? targetRoleListId, int? targetPosition)
     {
         var assignment = await db.Assignments.FindAsync(id);
         if (assignment is null) return null;
-        assignment.Symbol = symbol;
+        assignment.SymbolId = symbolId;
         assignment.Description = description;
         assignment.AssigneeRoleListId = assigneeRoleListId;
         assignment.AssigneePosition = assigneePosition;

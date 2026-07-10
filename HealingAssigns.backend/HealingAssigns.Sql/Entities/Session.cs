@@ -1,4 +1,4 @@
-namespace HealingAssigns.Sql;
+namespace HealingAssigns.Sql.Entities;
 
 public class Session
 {

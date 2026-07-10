@@ -5,14 +5,14 @@ import * as api from '../api'
 import { SlotSelect, decodeSlot } from './SlotSelect'
 
 const RAID_SYMBOLS = [
-    { name: 'Star', emoji: '⭐' },
-    { name: 'Circle', emoji: '🟠' },
-    { name: 'Diamond', emoji: '🔶' },
-    { name: 'Triangle', emoji: '🔺' },
-    { name: 'Moon', emoji: '🌙' },
-    { name: 'Square', emoji: '🟦' },
-    { name: 'Cross', emoji: '❌' },
-    { name: 'Skull', emoji: '💀' },
+    { id: 1, name: 'Skull', emoji: '💀' },
+    { id: 2, name: 'Star', emoji: '⭐' },
+    { id: 3, name: 'Circle', emoji: '🟠' },
+    { id: 4, name: 'Diamond', emoji: '🔶' },
+    { id: 5, name: 'Triangle', emoji: '🔺' },
+    { id: 6, name: 'Square', emoji: '🟦' },
+    { id: 7, name: 'Moon', emoji: '🌙' },
+    { id: 8, name: 'Cross', emoji: '❌' },
 ]
 
 function encodeSlot(roleListId: number, position: number) {
@@ -85,7 +85,7 @@ function EncounterCard({
         mutationFn: () =>
             api.createAssignment(
                 encounter.id,
-                RAID_SYMBOLS[0].name,
+                null,
                 null,
                 firstSlot?.id ?? session.roleLists[0]?.id ?? 0,
                 1,
@@ -98,7 +98,7 @@ function EncounterCard({
     const updateAssignment = useMutation({
         mutationFn: (a: Assignment) =>
             api.updateAssignment(
-                a.id, a.symbol, a.description,
+                a.id, a.symbolId, a.description,
                 a.assigneeRoleListId, a.assigneePosition,
                 a.targetRoleListId, a.targetPosition,
             ),
@@ -188,11 +188,12 @@ function AssignmentRow({
             <td>
                 <select
                     className="form-select form-select-sm"
-                    value={assignment.symbol}
-                    onChange={(e) => handleChange({ symbol: e.target.value })}
+                    value={assignment.symbolId ?? ''}
+                    onChange={(e) => handleChange({ symbolId: e.target.value ? Number(e.target.value) : null })}
                 >
+                    <option value="">None</option>
                     {RAID_SYMBOLS.map((s) => (
-                        <option key={s.name} value={s.name}>
+                        <option key={s.id} value={s.id}>
                             {s.emoji} {s.name}
                         </option>
                     ))}
@@ -279,8 +280,8 @@ function MacroOutput({ text }: { text: string }) {
 
 function buildMacro(encounter: Encounter, session: Session): string {
     const lines = encounter.assignments.map((a) => {
-        const symbol = RAID_SYMBOLS.find((s) => s.name === a.symbol)
-        const marker = symbol ? `{${symbol.name.toLowerCase()}}` : a.symbol
+        const symbol = a.symbolId ? RAID_SYMBOLS.find((s) => s.id === a.symbolId) : null
+        const marker = symbol ? `{${symbol.name.toLowerCase()}}` : ''
         const assigneeList = session.roleLists.find((r) => r.id === a.assigneeRoleListId)
         const assignee = assigneeList?.slots[a.assigneePosition - 1]?.playerName ?? '?'
 

@@ -1,4 +1,5 @@
 using HealingAssigns.Contracts;
+using HealingAssigns.Sql.Entities;
 
 namespace HealingAssigns.Sql.Mapping;
 
@@ -24,6 +25,6 @@ public static class EntityMappings
     );
 
     public static AssignmentDto ToDto(this Assignment a) =>
-        new(a.Id, a.Symbol, a.Description, a.AssigneeRoleListId, a.AssigneePosition,
+        new(a.Id, a.SymbolId, a.Description, a.AssigneeRoleListId, a.AssigneePosition,
             a.TargetRoleListId, a.TargetPosition, a.SortOrder);
 }

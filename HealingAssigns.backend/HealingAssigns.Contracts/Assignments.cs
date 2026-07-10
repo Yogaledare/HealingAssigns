@@ -1,7 +1,7 @@
 namespace HealingAssigns.Contracts;
 
 public record CreateAssignmentRequest(
-    string Symbol,
+    int? SymbolId,
     string? Description,
     int AssigneeRoleListId,
     int AssigneePosition,
@@ -9,7 +9,7 @@ public record CreateAssignmentRequest(
     int? TargetPosition);
 
 public record UpdateAssignmentRequest(
-    string Symbol,
+    int? SymbolId,
     string? Description,
     int AssigneeRoleListId,
     int AssigneePosition,
@@ -18,7 +18,7 @@ public record UpdateAssignmentRequest(
 
 public record AssignmentDto(
     int Id,
-    string Symbol,
+    int? SymbolId,
     string? Description,
     int AssigneeRoleListId,
     int AssigneePosition,

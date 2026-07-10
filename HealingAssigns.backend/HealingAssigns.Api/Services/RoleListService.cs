@@ -1,5 +1,6 @@
 using HealingAssigns.Contracts;
 using HealingAssigns.Sql;
+using HealingAssigns.Sql.Entities;
 using HealingAssigns.Sql.Mapping;
 using Microsoft.EntityFrameworkCore;
 

@@ -9,13 +9,13 @@ public static class AssignmentEndpoints
     {
         app.MapPost("/encounters/{encounterId}/assignments", async (int encounterId, CreateAssignmentRequest req, AssignmentService svc) =>
         {
-            var assignment = await svc.Create(encounterId, req.Symbol, req.Description,
+            var assignment = await svc.Create(encounterId, req.SymbolId, req.Description,
                 req.AssigneeRoleListId, req.AssigneePosition, req.TargetRoleListId, req.TargetPosition);
             return Results.Created($"/assignments/{assignment.Id}", assignment);
         }).RequireAuthorization();
 
         app.MapPut("/assignments/{id}", async (int id, UpdateAssignmentRequest req, AssignmentService svc) =>
-            await svc.Update(id, req.Symbol, req.Description,
+            await svc.Update(id, req.SymbolId, req.Description,
                 req.AssigneeRoleListId, req.AssigneePosition, req.TargetRoleListId, req.TargetPosition) is { } a
                 ? Results.Ok(a) : Results.NotFound())
             .RequireAuthorization();
