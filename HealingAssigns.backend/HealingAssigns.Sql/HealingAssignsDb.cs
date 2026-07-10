@@ -46,6 +46,22 @@ public class HealingAssignsDb : DbContext
             .HasForeignKey(a => a.SymbolId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<RoleList>()
+            .HasIndex(r => new { r.SessionId, r.SortOrder })
+            .IsUnique();
+
+        modelBuilder.Entity<RoleSlot>()
+            .HasIndex(s => new { s.RoleListId, s.SortOrder })
+            .IsUnique();
+
+        modelBuilder.Entity<Encounter>()
+            .HasIndex(e => new { e.SessionId, e.SortOrder })
+            .IsUnique();
+
+        modelBuilder.Entity<Assignment>()
+            .HasIndex(a => new { a.EncounterId, a.SortOrder })
+            .IsUnique();
+
         modelBuilder.Entity<Symbol>().HasData(
             new Symbol { Id = 1, Name = "Skull" },
             new Symbol { Id = 2, Name = "Star" },
