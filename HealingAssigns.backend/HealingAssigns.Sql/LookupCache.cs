@@ -1,7 +1,6 @@
-using HealingAssigns.Sql;
 using Microsoft.EntityFrameworkCore;
 
-namespace HealingAssigns.Api.Services;
+namespace HealingAssigns.Sql;
 
 public class LookupCache
 {
