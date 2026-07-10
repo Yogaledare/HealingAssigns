@@ -80,6 +80,10 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
             .Where(s => s.RoleListId == roleListId)
             .ToListAsync();
 
+        foreach (var slot in slots)
+            slot.SortOrder = -(slot.SortOrder + 1);
+        await db.SaveChangesAsync();
+
         for (var i = 0; i < slotIds.Count; i++)
         {
             var slot = slots.FirstOrDefault(s => s.Id == slotIds[i]);
