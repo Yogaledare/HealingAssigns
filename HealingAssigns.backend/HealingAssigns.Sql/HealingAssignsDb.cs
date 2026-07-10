@@ -13,6 +13,7 @@ public class HealingAssignsDb : DbContext
     public DbSet<Encounter> Encounters => Set<Encounter>();
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<Symbol> Symbols => Set<Symbol>();
+    public DbSet<PlayerClass> PlayerClasses => Set<PlayerClass>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,6 +62,24 @@ public class HealingAssignsDb : DbContext
         modelBuilder.Entity<Assignment>()
             .HasIndex(a => new { a.EncounterId, a.SortOrder })
             .IsUnique();
+
+        modelBuilder.Entity<RoleSlot>()
+            .HasOne(s => s.PlayerClass)
+            .WithMany()
+            .HasForeignKey(s => s.PlayerClassId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<PlayerClass>().HasData(
+            new PlayerClass { Id = 1, Name = "Warrior", Color = "#C69B6D" },
+            new PlayerClass { Id = 2, Name = "Priest", Color = "#FFFFFF" },
+            new PlayerClass { Id = 3, Name = "Mage", Color = "#3FC7EB" },
+            new PlayerClass { Id = 4, Name = "Druid", Color = "#FF7C0A" },
+            new PlayerClass { Id = 5, Name = "Hunter", Color = "#AAD372" },
+            new PlayerClass { Id = 6, Name = "Rogue", Color = "#FFF468" },
+            new PlayerClass { Id = 7, Name = "Shaman", Color = "#0070DD" },
+            new PlayerClass { Id = 8, Name = "Paladin", Color = "#F48CBA" },
+            new PlayerClass { Id = 9, Name = "Warlock", Color = "#8788EE" }
+        );
 
         modelBuilder.Entity<Symbol>().HasData(
             new Symbol { Id = 1, Name = "Skull" },

@@ -45,8 +45,7 @@ export interface RoleList {
 export interface RoleSlot {
   id: number
   playerName: string
-  className: string | null
-  classColor: string | null
+  playerClassId: number | null
   sortOrder: number
 }
 
@@ -132,12 +131,11 @@ export async function deleteRoleList(id: number): Promise<void> {
 export async function createSlot(
   roleListId: number,
   playerName: string,
-  className?: string,
-  classColor?: string,
+  playerClassId?: number | null,
 ): Promise<RoleSlot> {
   const res = await apiFetch(`/rolelists/${roleListId}/slots`, {
     method: 'POST',
-    body: JSON.stringify({ playerName, className: className ?? null, classColor: classColor ?? null }),
+    body: JSON.stringify({ playerName, playerClassId: playerClassId ?? null }),
   })
   return res.json()
 }

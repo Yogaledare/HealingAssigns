@@ -47,7 +47,7 @@ public class RoleListService(HealingAssignsDb db)
         return true;
     }
 
-    public async Task<RoleSlotDto> CreateSlot(int roleListId, string playerName, string? className, string? classColor)
+    public async Task<RoleSlotDto> CreateSlot(int roleListId, string playerName, int? playerClassId)
     {
         var maxSort = await db.RoleSlots
             .Where(s => s.RoleListId == roleListId)
@@ -57,8 +57,7 @@ public class RoleListService(HealingAssignsDb db)
         {
             RoleListId = roleListId,
             PlayerName = playerName,
-            ClassName = className,
-            ClassColor = classColor,
+            PlayerClassId = playerClassId,
             SortOrder = maxSort + 1
         };
         db.RoleSlots.Add(slot);

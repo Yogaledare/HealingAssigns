@@ -17,7 +17,7 @@ public static class EntityMappings
     );
 
     public static RoleSlotDto ToDto(this RoleSlot s) =>
-        new(s.Id, s.PlayerName, s.ClassName, s.ClassColor, s.SortOrder);
+        new(s.Id, s.PlayerName, s.PlayerClassId, s.SortOrder);
 
     public static EncounterDto ToDto(this Encounter e, IEnumerable<Assignment> assignments) => new(
         e.Id, e.Name, e.SortOrder,

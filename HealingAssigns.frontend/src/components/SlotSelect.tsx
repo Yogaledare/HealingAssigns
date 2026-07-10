@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { RoleList } from '../api'
 import { readableColor } from '../lib/color'
+import { getClassColor } from '../lib/wowClasses'
 
 function encodeSlot(roleListId: number, position: number) {
     return `${roleListId}:${position}`
@@ -59,7 +60,7 @@ export function SlotSelect({
                         {selected.icon ?? ''}
                         {selected.icon ? ' ' : ''}
                         #{selected.position}{' '}
-                        <span style={{ color: readableColor(selected.slot.classColor), opacity: 0.7 }}>
+                        <span style={{ color: readableColor(getClassColor(selected.slot.playerClassId)), opacity: 0.7 }}>
                             ({selected.slot.playerName})
                         </span>
                     </>
@@ -96,7 +97,7 @@ export function SlotSelect({
                                     >
                                         {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1}{' '}
                                         <span style={{
-                                            color: isActive ? undefined : readableColor(slot.classColor),
+                                            color: isActive ? undefined : readableColor(getClassColor(slot.playerClassId)),
                                             opacity: 0.7,
                                         }}>
                                             ({slot.playerName})

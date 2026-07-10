@@ -23,7 +23,7 @@ public static class RoleListEndpoints
 
         app.MapPost("/rolelists/{roleListId}/slots", async (int roleListId, CreateSlotRequest req, RoleListService svc) =>
         {
-            var slot = await svc.CreateSlot(roleListId, req.PlayerName, req.ClassName, req.ClassColor);
+            var slot = await svc.CreateSlot(roleListId, req.PlayerName, req.PlayerClassId);
             return Results.Created($"/slots/{slot.Id}", slot);
         }).RequireAuthorization();
 

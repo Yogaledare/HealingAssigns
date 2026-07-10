@@ -22,18 +22,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { Session, RoleList, RoleSlot } from '../api'
 import * as api from '../api'
 import { readableColor, isLightColor } from '../lib/color'
-
-const WOW_CLASSES = [
-    { name: 'Druid', color: '#FF7C0A' },
-    { name: 'Hunter', color: '#AAD372' },
-    { name: 'Mage', color: '#3FC7EB' },
-    { name: 'Paladin', color: '#F48CBA' },
-    { name: 'Priest', color: '#FFFFFF' },
-    { name: 'Rogue', color: '#FFF468' },
-    { name: 'Shaman', color: '#0070DD' },
-    { name: 'Warlock', color: '#8788EE' },
-    { name: 'Warrior', color: '#C69B6D' },
-]
+import { WOW_CLASSES, getClassColor, getClassName } from '../lib/wowClasses'
 
 export const ROLE_ICONS = [
     { value: '🩹', label: 'Healer' },
@@ -49,12 +38,13 @@ export const ROLE_ICONS = [
 // --- Small presentational components ---
 
 function SlotBadge({ slot }: { slot: RoleSlot }) {
-    const light = isLightColor(slot.classColor)
+    const color = getClassColor(slot.playerClassId)
+    const light = isLightColor(color)
     return (
         <span
             className="badge rounded-pill px-2 py-1 text-start"
             style={{
-                backgroundColor: light ? readableColor(slot.classColor) : (slot.classColor ?? '#6c757d'),
+                backgroundColor: light ? readableColor(color) : (color ?? '#6c757d'),
                 color: '#fff',
                 fontSize: '0.8rem',
             }}
@@ -67,15 +57,14 @@ function SlotBadge({ slot }: { slot: RoleSlot }) {
 function AddSlotForm({
     onAdd,
 }: {
-    onAdd: (name: string, className?: string, classColor?: string) => void
+    onAdd: (name: string, playerClassId: number | null) => void
 }) {
     const [name, setName] = useState('')
     const [cls, setCls] = useState('')
 
     const handleAdd = () => {
         if (!name.trim()) return
-        const wowClass = WOW_CLASSES.find((c) => c.name === cls)
-        onAdd(name.trim(), wowClass?.name, wowClass?.color)
+        onAdd(name.trim(), cls ? Number(cls) : null)
         setName('')
         setCls('')
     }
@@ -97,7 +86,7 @@ function AddSlotForm({
             >
                 <option value="">Class</option>
                 {WOW_CLASSES.map((c) => (
-                    <option key={c.name} value={c.name}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
             </select>
             <button className="btn btn-primary" onClick={handleAdd}>+</button>
@@ -137,7 +126,7 @@ function SortableSlot({ slot, onRemove }: { slot: RoleSlot; onRemove: () => void
                 <SlotBadge slot={slot} />
             </div>
             <div className="col-auto">
-                <small className="text-secondary">{slot.className ?? ''}</small>
+                <small className="text-secondary">{getClassName(slot.playerClassId) ?? ''}</small>
             </div>
             <div className="col-auto">
                 <button
@@ -163,7 +152,7 @@ function RoleListCard({
     onReorder,
 }: {
     list: RoleList
-    onAddSlot: (name: string, className?: string, classColor?: string) => void
+    onAddSlot: (name: string, playerClassId: number | null) => void
     onRemoveSlot: (id: number) => void
     onRemoveList: () => void
     onUpdateIcon: (icon: string | null) => void
@@ -277,8 +266,8 @@ export function RoleListPanel({ session }: { session: Session }) {
     })
 
     const addSlot = useMutation({
-        mutationFn: (args: { roleListId: number; playerName: string; className?: string; classColor?: string }) =>
-            api.createSlot(args.roleListId, args.playerName, args.className, args.classColor),
+        mutationFn: (args: { roleListId: number; playerName: string; playerClassId: number | null }) =>
+            api.createSlot(args.roleListId, args.playerName, args.playerClassId),
         onSuccess: invalidate,
     })
 
@@ -369,8 +358,8 @@ export function RoleListPanel({ session }: { session: Session }) {
                     <RoleListCard
                         key={list.id}
                         list={list}
-                        onAddSlot={(name, className, classColor) =>
-                            addSlot.mutate({ roleListId: list.id, playerName: name, className, classColor })
+                        onAddSlot={(name, playerClassId) =>
+                            addSlot.mutate({ roleListId: list.id, playerName: name, playerClassId })
                         }
                         onRemoveSlot={(id) => removeSlot.mutate(id)}
                         onRemoveList={() => removeList.mutate(list.id)}

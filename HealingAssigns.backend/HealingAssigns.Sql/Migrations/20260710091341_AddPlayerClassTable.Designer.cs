@@ -4,6 +4,7 @@ using HealingAssigns.Sql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealingAssigns.Sql.Migrations
 {
     [DbContext(typeof(HealingAssignsDb))]
-    partial class HealingAssignsDbModelSnapshot : ModelSnapshot
+    [Migration("20260710091341_AddPlayerClassTable")]
+    partial class AddPlayerClassTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
