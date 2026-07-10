@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealingAssigns.Api.Services;
 
-public class EncounterService(HealingAssignsDb db)
+public class EncounterService(HealingAssignsDb db, LookupCache lookup)
 {
     public async Task<EncounterDto> Create(int sessionId, string name)
     {
@@ -22,7 +22,7 @@ public class EncounterService(HealingAssignsDb db)
         };
         db.Encounters.Add(encounter);
         await db.SaveChangesAsync();
-        return encounter.ToDto([]);
+        return encounter.ToDto([], lookup.SymbolName);
     }
 
     public async Task<EncounterDto?> Update(int id, string name)
@@ -33,7 +33,7 @@ public class EncounterService(HealingAssignsDb db)
         if (encounter is null) return null;
         encounter.Name = name;
         await db.SaveChangesAsync();
-        return encounter.ToDto(encounter.Assignments);
+        return encounter.ToDto(encounter.Assignments, lookup.SymbolName);
     }
 
     public async Task<bool> Delete(int id)

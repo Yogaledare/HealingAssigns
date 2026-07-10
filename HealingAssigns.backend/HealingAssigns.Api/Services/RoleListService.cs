@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealingAssigns.Api.Services;
 
-public class RoleListService(HealingAssignsDb db)
+public class RoleListService(HealingAssignsDb db, LookupCache lookup)
 {
     public async Task<RoleListDto> Create(int sessionId, string name, string? icon)
     {
@@ -23,7 +23,7 @@ public class RoleListService(HealingAssignsDb db)
         };
         db.RoleLists.Add(roleList);
         await db.SaveChangesAsync();
-        return roleList.ToDto([]);
+        return roleList.ToDto([], lookup.PlayerClassName);
     }
 
     public async Task<RoleListDto?> Update(int id, string name, string? icon)
@@ -35,7 +35,7 @@ public class RoleListService(HealingAssignsDb db)
         roleList.Name = name;
         roleList.Icon = icon;
         await db.SaveChangesAsync();
-        return roleList.ToDto(roleList.Slots);
+        return roleList.ToDto(roleList.Slots, lookup.PlayerClassName);
     }
 
     public async Task<bool> Delete(int id)
@@ -62,7 +62,7 @@ public class RoleListService(HealingAssignsDb db)
         };
         db.RoleSlots.Add(slot);
         await db.SaveChangesAsync();
-        return slot.ToDto();
+        return slot.ToDto(lookup.PlayerClassName);
     }
 
     public async Task<bool> DeleteSlot(int id)

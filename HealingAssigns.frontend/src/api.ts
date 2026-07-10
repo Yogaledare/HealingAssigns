@@ -46,6 +46,7 @@ export interface RoleSlot {
   id: number
   playerName: string
   playerClassId: number | null
+  playerClassName: string | null
   sortOrder: number
 }
 
@@ -59,6 +60,7 @@ export interface Encounter {
 export interface Assignment {
   id: number
   symbolId: number | null
+  symbolName: string | null
   description: string | null
   assigneeRoleListId: number
   assigneePosition: number

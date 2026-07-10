@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealingAssigns.Api.Services;
 
-public class SessionService(HealingAssignsDb db)
+public class SessionService(HealingAssignsDb db, LookupCache lookup)
 {
     public async Task<List<SessionSummaryDto>> GetAll()
     {
@@ -28,8 +28,8 @@ public class SessionService(HealingAssignsDb db)
         if (session is null) return null;
 
         return session.ToDto(
-            session.RoleLists.Select(r => r.ToDto(r.Slots)).ToList(),
-            session.Encounters.Select(e => e.ToDto(e.Assignments)).ToList()
+            session.RoleLists.Select(r => r.ToDto(r.Slots, lookup.PlayerClassName)).ToList(),
+            session.Encounters.Select(e => e.ToDto(e.Assignments, lookup.SymbolName)).ToList()
         );
     }
 

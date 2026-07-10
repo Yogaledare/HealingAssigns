@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HealingAssigns.Api.Services;
 
-public class AssignmentService(HealingAssignsDb db)
+public class AssignmentService(HealingAssignsDb db, LookupCache lookup)
 {
     public async Task<AssignmentDto> Create(int encounterId, int? symbolId, string? description,
         int assigneeRoleListId, int assigneePosition, int? targetRoleListId, int? targetPosition)
@@ -28,7 +28,7 @@ public class AssignmentService(HealingAssignsDb db)
         };
         db.Assignments.Add(assignment);
         await db.SaveChangesAsync();
-        return assignment.ToDto();
+        return assignment.ToDto(lookup.SymbolName);
     }
 
     public async Task<AssignmentDto?> Update(int id, int? symbolId, string? description,
@@ -43,7 +43,7 @@ public class AssignmentService(HealingAssignsDb db)
         assignment.TargetRoleListId = targetRoleListId;
         assignment.TargetPosition = targetPosition;
         await db.SaveChangesAsync();
-        return assignment.ToDto();
+        return assignment.ToDto(lookup.SymbolName);
     }
 
     public async Task<bool> Delete(int id)

@@ -22,6 +22,7 @@ builder.Services.AddScoped<SessionService>();
 builder.Services.AddScoped<RoleListService>();
 builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<AssignmentService>();
+builder.Services.AddSingleton<LookupCache>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -57,6 +58,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<HealingAssignsDb>();
     await db.Database.EnsureCreatedAsync();
+    await scope.ServiceProvider.GetRequiredService<LookupCache>().Load(db);
 }
 
 if (app.Environment.IsDevelopment())

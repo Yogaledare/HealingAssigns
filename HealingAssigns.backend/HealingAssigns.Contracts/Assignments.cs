@@ -19,6 +19,7 @@ public record UpdateAssignmentRequest(
 public record AssignmentDto(
     int Id,
     int? SymbolId,
+    string? SymbolName,
     string? Description,
     int AssigneeRoleListId,
     int AssigneePosition,
