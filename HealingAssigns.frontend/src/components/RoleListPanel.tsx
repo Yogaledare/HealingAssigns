@@ -77,7 +77,7 @@ function AddSlotForm({
             >
                 <option value="">Class</option>
                 {refs?.playerClasses.map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
                 ))}
             </select>
             <button className="btn btn-primary" onClick={handleAdd}>+</button>

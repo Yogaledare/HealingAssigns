@@ -186,7 +186,7 @@ function AssignmentRow({
                     <option value="">None</option>
                     {refs?.symbols.map((s) => (
                         <option key={s.id} value={s.id}>
-                            {s.name}
+                            {s.icon} {s.name}
                         </option>
                     ))}
                 </select>

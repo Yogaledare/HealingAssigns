@@ -5,6 +5,6 @@ public record ReferencesDto(
     List<PlayerClassRefDto> PlayerClasses,
     List<RoleRefDto> Roles);
 
-public record SymbolRefDto(int Id, string Name);
-public record PlayerClassRefDto(int Id, string Name, string Color);
+public record SymbolRefDto(int Id, string Name, string Icon);
+public record PlayerClassRefDto(int Id, string Name, string Color, string Icon);
 public record RoleRefDto(int Id, string Name, string Icon);

@@ -46,12 +46,14 @@ export interface RoleList {
 export interface SymbolRef {
   id: number
   name: string
+  icon: string
 }
 
 export interface PlayerClassRef {
   id: number
   name: string
   color: string
+  icon: string
 }
 
 export interface RoleRef {

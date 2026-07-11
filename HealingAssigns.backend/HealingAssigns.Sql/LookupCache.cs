@@ -22,8 +22,8 @@ public class LookupCache
         _roles = roles.ToDictionary(r => r.Id, r => r.Name);
 
         _references = new ReferencesDto(
-            symbols.Select(s => new SymbolRefDto(s.Id, s.Name)).ToList(),
-            playerClasses.Select(c => new PlayerClassRefDto(c.Id, c.Name, c.Color)).ToList(),
+            symbols.Select(s => new SymbolRefDto(s.Id, s.Name, s.Icon)).ToList(),
+            playerClasses.Select(c => new PlayerClassRefDto(c.Id, c.Name, c.Color, c.Icon)).ToList(),
             roles.Select(r => new RoleRefDto(r.Id, r.Name, r.Icon)).ToList()
         );
     }
