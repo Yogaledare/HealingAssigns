@@ -22,7 +22,7 @@ function SessionList() {
     const queryClient = useQueryClient()
     const navigate = useNavigate()
 
-    const { data: sessions } = useQuery({
+    const { data: sessions, isPending } = useQuery({
         queryKey: ['sessions'],
         queryFn: api.getSessions,
     })
@@ -56,25 +56,34 @@ function SessionList() {
                 New Session
             </button>
 
-            <div className="list-group">
-                {sessions?.map((s) => (
-                    <Link
-                        key={s.id}
-                        className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                        to={`/session/${s.id}`}
-                    >
-                        <span className="fw-semibold">{s.name}</span>
-                        <small className="text-secondary">
-                            {new Date(s.createdAt).toLocaleDateString()}
-                        </small>
-                    </Link>
-                ))}
-                {sessions?.length === 0 && (
-                    <p className="text-secondary text-center py-5">
-                        No sessions yet. Create one to get started.
-                    </p>
-                )}
-            </div>
+            {isPending ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-secondary mt-3 mb-0">Loading sessions...</p>
+                </div>
+            ) : (
+                <div className="list-group">
+                    {sessions?.map((s) => (
+                        <Link
+                            key={s.id}
+                            className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                            to={`/session/${s.id}`}
+                        >
+                            <span className="fw-semibold">{s.name}</span>
+                            <small className="text-secondary">
+                                {new Date(s.createdAt).toLocaleDateString()}
+                            </small>
+                        </Link>
+                    ))}
+                    {sessions?.length === 0 && (
+                        <p className="text-secondary text-center py-5">
+                            No sessions yet. Create one to get started.
+                        </p>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
@@ -83,7 +92,7 @@ function SessionView() {
     const { user, logout } = useAuth()
     const { id } = useParams()
 
-    const { data: session } = useQuery({
+    const { data: session, isPending } = useQuery({
         queryKey: ['session', Number(id)],
         queryFn: () => api.getSession(Number(id)),
     })
@@ -105,14 +114,23 @@ function SessionView() {
                 </div>
             </nav>
 
-            <div className="row g-0 flex-grow-1 overflow-hidden">
-                <div className="col overflow-auto p-3">
-                    {session && <EncounterPanel session={session} />}
+            {isPending ? (
+                <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center">
+                    <div className="spinner-border text-secondary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="text-secondary mt-3 mb-0">Loading session...</p>
                 </div>
-                <div className="col-auto border-start overflow-auto p-3" style={{ width: 340 }}>
-                    {session && <RoleListPanel session={session} />}
+            ) : (
+                <div className="row g-0 flex-grow-1 overflow-hidden">
+                    <div className="col overflow-auto p-3">
+                        {session && <EncounterPanel session={session} />}
+                    </div>
+                    <div className="col-auto border-start overflow-auto p-3" style={{ width: 340 }}>
+                        {session && <RoleListPanel session={session} />}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }
