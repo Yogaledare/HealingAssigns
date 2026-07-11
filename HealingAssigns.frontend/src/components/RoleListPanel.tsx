@@ -139,17 +139,16 @@ function RoleListCard({
     onAddSlot,
     onRemoveSlot,
     onRemoveList,
-    onUpdateRole,
+    onUpdateIcon,
     onReorder,
 }: {
     list: RoleList
     onAddSlot: (name: string, playerClassId: number | null) => void
     onRemoveSlot: (id: number) => void
     onRemoveList: () => void
-    onUpdateRole: (roleId: number | null) => void
+    onUpdateIcon: (icon: string | null) => void
     onReorder: (slotIds: number[]) => void
 }) {
-    const { data: refs } = useReferences()
     const [activeId, setActiveId] = useState<number | null>(null)
 
     const sensors = useSensors(
@@ -176,17 +175,13 @@ function RoleListCard({
             <div className="card-body p-3">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                     <div className="d-flex align-items-center gap-1">
-                        <select
-                            className="form-select form-select-sm border-0 bg-transparent p-0"
-                            value={list.roleId ?? ''}
-                            onChange={(e) => onUpdateRole(e.target.value ? Number(e.target.value) : null)}
-                            style={{ width: 36 }}
-                        >
-                            <option value="">—</option>
-                            {refs?.roles.map((role) => (
-                                <option key={role.id} value={role.id}>{role.icon}</option>
-                            ))}
-                        </select>
+                        <input
+                            className="form-control form-control-sm border-0 bg-transparent p-0 text-center"
+                            value={list.icon ?? ''}
+                            onChange={(e) => onUpdateIcon(e.target.value || null)}
+                            placeholder="—"
+                            style={{ width: 32, fontSize: '1.1rem' }}
+                        />
                         <h6 className="mb-0 fw-semibold">{list.name}</h6>
                     </div>
                     <button className="btn btn-sm btn-outline-danger" onClick={onRemoveList}>
@@ -241,14 +236,14 @@ export function RoleListPanel({ session }: { session: Session }) {
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ['session', session.id] })
 
     const addList = useMutation({
-        mutationFn: (args: { name: string; roleId: number | null }) =>
-            api.createRoleList(session.id, args.name, args.roleId),
+        mutationFn: (args: { name: string; icon: string | null }) =>
+            api.createRoleList(session.id, args.name, args.icon),
         onSuccess: invalidate,
     })
 
     const updateList = useMutation({
-        mutationFn: (args: { id: number; name: string; roleId: number | null }) =>
-            api.updateRoleList(args.id, args.name, args.roleId),
+        mutationFn: (args: { id: number; name: string; icon: string | null }) =>
+            api.updateRoleList(args.id, args.name, args.icon),
         onSuccess: invalidate,
     })
 
@@ -289,16 +284,15 @@ export function RoleListPanel({ session }: { session: Session }) {
         reorderSlots.mutate({ roleListId, slotIds })
     }
 
-    const { data: refs } = useReferences()
     const [newListName, setNewListName] = useState('')
-    const [newListRole, setNewListRole] = useState('')
+    const [newListIcon, setNewListIcon] = useState('')
     const [showAddForm, setShowAddForm] = useState(false)
 
     const handleAddList = () => {
         if (!newListName.trim()) return
-        addList.mutate({ name: newListName.trim(), roleId: newListRole ? Number(newListRole) : null })
+        addList.mutate({ name: newListName.trim(), icon: newListIcon || null })
         setNewListName('')
-        setNewListRole('')
+        setNewListIcon('')
         setShowAddForm(false)
     }
 
@@ -315,19 +309,13 @@ export function RoleListPanel({ session }: { session: Session }) {
                 <div className="card mb-3">
                     <div className="card-body p-2">
                         <div className="input-group input-group-sm">
-                            <select
-                                className="form-select"
-                                value={newListRole}
-                                onChange={(e) => setNewListRole(e.target.value)}
-                                style={{ maxWidth: 100 }}
-                            >
-                                <option value="">Role</option>
-                                {refs?.roles.map((role) => (
-                                    <option key={role.id} value={role.id}>
-                                        {role.icon} {role.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <input
+                                className="form-control text-center"
+                                value={newListIcon}
+                                onChange={(e) => setNewListIcon(e.target.value)}
+                                placeholder="Icon"
+                                style={{ maxWidth: 60 }}
+                            />
                             <input
                                 className="form-control"
                                 placeholder="List name"
@@ -356,7 +344,7 @@ export function RoleListPanel({ session }: { session: Session }) {
                         }
                         onRemoveSlot={(id) => removeSlot.mutate(id)}
                         onRemoveList={() => removeList.mutate(list.id)}
-                        onUpdateRole={(roleId) => updateList.mutate({ id: list.id, name: list.name, roleId })}
+                        onUpdateIcon={(icon) => updateList.mutate({ id: list.id, name: list.name, icon })}
                         onReorder={(slotIds) => handleReorder(list.id, slotIds)}
                     />
                 ))}

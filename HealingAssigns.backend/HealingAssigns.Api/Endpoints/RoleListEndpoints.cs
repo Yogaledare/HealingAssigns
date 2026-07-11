@@ -9,12 +9,12 @@ public static class RoleListEndpoints
     {
         app.MapPost("/sessions/{sessionId}/rolelists", async (int sessionId, CreateRoleListRequest req, RoleListService svc) =>
         {
-            var roleList = await svc.Create(sessionId, req.Name, req.RoleId);
+            var roleList = await svc.Create(sessionId, req.Name, req.Icon);
             return Results.Created($"/rolelists/{roleList.Id}", roleList);
         }).RequireAuthorization();
 
         app.MapPut("/rolelists/{id}", async (int id, UpdateRoleListRequest req, RoleListService svc) =>
-            await svc.Update(id, req.Name, req.RoleId) is { } r ? Results.Ok(r) : Results.NotFound())
+            await svc.Update(id, req.Name, req.Icon) is { } r ? Results.Ok(r) : Results.NotFound())
             .RequireAuthorization();
 
         app.MapDelete("/rolelists/{id}", async (int id, RoleListService svc) =>

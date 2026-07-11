@@ -20,7 +20,3 @@ export function getClassName(refs: References | undefined, playerClassId: number
   return refs.playerClasses.find((c) => c.id === playerClassId)?.name ?? null
 }
 
-export function getRoleIcon(refs: References | undefined, roleId: number | null): string | null {
-  if (!roleId || !refs) return null
-  return refs.roles.find((r) => r.id === roleId)?.icon ?? null
-}

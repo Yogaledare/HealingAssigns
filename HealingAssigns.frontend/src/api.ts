@@ -37,8 +37,7 @@ export interface Session {
 export interface RoleList {
   id: number
   name: string
-  roleId: number | null
-  roleName: string | null
+  icon: string | null
   sortOrder: number
   slots: RoleSlot[]
 }
@@ -56,16 +55,9 @@ export interface PlayerClassRef {
   icon: string
 }
 
-export interface RoleRef {
-  id: number
-  name: string
-  icon: string
-}
-
 export interface References {
   symbols: SymbolRef[]
   playerClasses: PlayerClassRef[]
-  roles: RoleRef[]
 }
 
 export interface RoleSlot {
@@ -141,18 +133,18 @@ export async function getReferences(): Promise<References> {
 }
 
 // Role Lists
-export async function createRoleList(sessionId: number, name: string, roleId: number | null): Promise<RoleList> {
+export async function createRoleList(sessionId: number, name: string, icon: string | null): Promise<RoleList> {
   const res = await apiFetch(`/sessions/${sessionId}/rolelists`, {
     method: 'POST',
-    body: JSON.stringify({ name, roleId }),
+    body: JSON.stringify({ name, icon }),
   })
   return res.json()
 }
 
-export async function updateRoleList(id: number, name: string, roleId: number | null): Promise<RoleList> {
+export async function updateRoleList(id: number, name: string, icon: string | null): Promise<RoleList> {
   const res = await apiFetch(`/rolelists/${id}`, {
     method: 'PUT',
-    body: JSON.stringify({ name, roleId }),
+    body: JSON.stringify({ name, icon }),
   })
   return res.json()
 }
