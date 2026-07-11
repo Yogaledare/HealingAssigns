@@ -22,7 +22,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { Session, RoleList, RoleSlot } from '../api'
 import * as api from '../api'
 import { readableColor, isLightColor } from '../lib/color'
-import { useReferences, getClassColor, getRoleIcon } from '../hooks/useReferences'
+import { useReferences, getClassColor } from '../hooks/useReferences'
 
 // --- Small presentational components ---
 
@@ -170,7 +170,6 @@ function RoleListCard({
     }
 
     const activeSlot = activeId ? list.slots.find((s) => s.id === activeId) : null
-    const roleIcon = getRoleIcon(refs, list.roleId)
 
     return (
         <div className="card">
