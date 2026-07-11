@@ -22,23 +22,13 @@ import { CSS } from '@dnd-kit/utilities'
 import type { Session, RoleList, RoleSlot } from '../api'
 import * as api from '../api'
 import { readableColor, isLightColor } from '../lib/color'
-import { WOW_CLASSES, getClassColor, getClassName } from '../lib/wowClasses'
-
-export const ROLE_ICONS = [
-    { value: '🩹', label: 'Healer' },
-    { value: '🛡️', label: 'Tank' },
-    { value: '⚔️', label: 'DPS' },
-    { value: '🔇', label: 'Interrupt' },
-    { value: '💀', label: 'Skull' },
-    { value: '🎯', label: 'Target' },
-    { value: '🔥', label: 'Fire' },
-    { value: '❄️', label: 'Frost' },
-]
+import { useReferences, getClassColor, getRoleIcon } from '../hooks/useReferences'
 
 // --- Small presentational components ---
 
 function SlotBadge({ slot }: { slot: RoleSlot }) {
-    const color = getClassColor(slot.playerClassId)
+    const { data: refs } = useReferences()
+    const color = getClassColor(refs, slot.playerClassId)
     const light = isLightColor(color)
     return (
         <span
@@ -59,6 +49,7 @@ function AddSlotForm({
 }: {
     onAdd: (name: string, playerClassId: number | null) => void
 }) {
+    const { data: refs } = useReferences()
     const [name, setName] = useState('')
     const [cls, setCls] = useState('')
 
@@ -85,7 +76,7 @@ function AddSlotForm({
                 style={{ maxWidth: 100 }}
             >
                 <option value="">Class</option>
-                {WOW_CLASSES.map((c) => (
+                {refs?.playerClasses.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
             </select>
@@ -126,7 +117,7 @@ function SortableSlot({ slot, onRemove }: { slot: RoleSlot; onRemove: () => void
                 <SlotBadge slot={slot} />
             </div>
             <div className="col-auto">
-                <small className="text-secondary">{getClassName(slot.playerClassId) ?? ''}</small>
+                <small className="text-secondary">{slot.playerClassName ?? ''}</small>
             </div>
             <div className="col-auto">
                 <button
@@ -148,16 +139,17 @@ function RoleListCard({
     onAddSlot,
     onRemoveSlot,
     onRemoveList,
-    onUpdateIcon,
+    onUpdateRole,
     onReorder,
 }: {
     list: RoleList
     onAddSlot: (name: string, playerClassId: number | null) => void
     onRemoveSlot: (id: number) => void
     onRemoveList: () => void
-    onUpdateIcon: (icon: string | null) => void
+    onUpdateRole: (roleId: number | null) => void
     onReorder: (slotIds: number[]) => void
 }) {
+    const { data: refs } = useReferences()
     const [activeId, setActiveId] = useState<number | null>(null)
 
     const sensors = useSensors(
@@ -178,6 +170,7 @@ function RoleListCard({
     }
 
     const activeSlot = activeId ? list.slots.find((s) => s.id === activeId) : null
+    const roleIcon = getRoleIcon(refs, list.roleId)
 
     return (
         <div className="card">
@@ -186,13 +179,13 @@ function RoleListCard({
                     <div className="d-flex align-items-center gap-1">
                         <select
                             className="form-select form-select-sm border-0 bg-transparent p-0"
-                            value={list.icon ?? ''}
-                            onChange={(e) => onUpdateIcon(e.target.value || null)}
+                            value={list.roleId ?? ''}
+                            onChange={(e) => onUpdateRole(e.target.value ? Number(e.target.value) : null)}
                             style={{ width: 36 }}
                         >
                             <option value="">—</option>
-                            {ROLE_ICONS.map((icon) => (
-                                <option key={icon.value} value={icon.value}>{icon.value}</option>
+                            {refs?.roles.map((role) => (
+                                <option key={role.id} value={role.id}>{role.icon}</option>
                             ))}
                         </select>
                         <h6 className="mb-0 fw-semibold">{list.name}</h6>
@@ -249,14 +242,14 @@ export function RoleListPanel({ session }: { session: Session }) {
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ['session', session.id] })
 
     const addList = useMutation({
-        mutationFn: (args: { name: string; icon: string | null }) =>
-            api.createRoleList(session.id, args.name, args.icon),
+        mutationFn: (args: { name: string; roleId: number | null }) =>
+            api.createRoleList(session.id, args.name, args.roleId),
         onSuccess: invalidate,
     })
 
     const updateList = useMutation({
-        mutationFn: (args: { id: number; name: string; icon: string | null }) =>
-            api.updateRoleList(args.id, args.name, args.icon),
+        mutationFn: (args: { id: number; name: string; roleId: number | null }) =>
+            api.updateRoleList(args.id, args.name, args.roleId),
         onSuccess: invalidate,
     })
 
@@ -297,15 +290,16 @@ export function RoleListPanel({ session }: { session: Session }) {
         reorderSlots.mutate({ roleListId, slotIds })
     }
 
+    const { data: refs } = useReferences()
     const [newListName, setNewListName] = useState('')
-    const [newListIcon, setNewListIcon] = useState('')
+    const [newListRole, setNewListRole] = useState('')
     const [showAddForm, setShowAddForm] = useState(false)
 
     const handleAddList = () => {
         if (!newListName.trim()) return
-        addList.mutate({ name: newListName.trim(), icon: newListIcon || null })
+        addList.mutate({ name: newListName.trim(), roleId: newListRole ? Number(newListRole) : null })
         setNewListName('')
-        setNewListIcon('')
+        setNewListRole('')
         setShowAddForm(false)
     }
 
@@ -324,14 +318,14 @@ export function RoleListPanel({ session }: { session: Session }) {
                         <div className="input-group input-group-sm">
                             <select
                                 className="form-select"
-                                value={newListIcon}
-                                onChange={(e) => setNewListIcon(e.target.value)}
-                                style={{ maxWidth: 80 }}
+                                value={newListRole}
+                                onChange={(e) => setNewListRole(e.target.value)}
+                                style={{ maxWidth: 100 }}
                             >
-                                <option value="">Icon</option>
-                                {ROLE_ICONS.map((icon) => (
-                                    <option key={icon.value} value={icon.value}>
-                                        {icon.value} {icon.label}
+                                <option value="">Role</option>
+                                {refs?.roles.map((role) => (
+                                    <option key={role.id} value={role.id}>
+                                        {role.icon} {role.name}
                                     </option>
                                 ))}
                             </select>
@@ -363,7 +357,7 @@ export function RoleListPanel({ session }: { session: Session }) {
                         }
                         onRemoveSlot={(id) => removeSlot.mutate(id)}
                         onRemoveList={() => removeList.mutate(list.id)}
-                        onUpdateIcon={(icon) => updateList.mutate({ id: list.id, name: list.name, icon })}
+                        onUpdateRole={(roleId) => updateList.mutate({ id: list.id, name: list.name, roleId })}
                         onReorder={(slotIds) => handleReorder(list.id, slotIds)}
                     />
                 ))}

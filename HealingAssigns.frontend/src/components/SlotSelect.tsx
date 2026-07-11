@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { RoleList } from '../api'
 import { readableColor } from '../lib/color'
-import { getClassColor } from '../lib/wowClasses'
+import { useReferences, getClassColor, getRoleIcon } from '../hooks/useReferences'
 
 function encodeSlot(roleListId: number, position: number) {
     return `${roleListId}:${position}`
@@ -24,6 +24,7 @@ export function SlotSelect({
     onChange: (value: string) => void
     allowNone?: boolean
 }) {
+    const { data: refs } = useReferences()
     const [open, setOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
 
@@ -41,7 +42,8 @@ export function SlotSelect({
         if (!decoded) return null
         const list = roleLists.find((r) => r.id === decoded.roleListId)
         const slot = list?.slots[decoded.position - 1] ?? null
-        return slot ? { slot, icon: list?.icon ?? null, position: decoded.position } : null
+        const roleIcon = list ? getRoleIcon(refs, list.roleId) : null
+        return slot ? { slot, roleIcon, position: decoded.position } : null
     })()
 
     const select = (v: string) => {
@@ -57,10 +59,10 @@ export function SlotSelect({
             >
                 {selected ? (
                     <>
-                        {selected.icon ?? ''}
-                        {selected.icon ? ' ' : ''}
+                        {selected.roleIcon ?? ''}
+                        {selected.roleIcon ? ' ' : ''}
                         #{selected.position}{' '}
-                        <span style={{ color: readableColor(getClassColor(selected.slot.playerClassId)), opacity: 0.7 }}>
+                        <span style={{ color: readableColor(getClassColor(refs, selected.slot.playerClassId)), opacity: 0.7 }}>
                             ({selected.slot.playerName})
                         </span>
                     </>
@@ -75,10 +77,12 @@ export function SlotSelect({
                     {allowNone && (
                         <button className="dropdown-item" onClick={() => select('')}>—</button>
                     )}
-                    {roleLists.map((list) => (
+                    {roleLists.map((list) => {
+                        const listIcon = getRoleIcon(refs, list.roleId)
+                        return (
                         <div key={list.id}>
                             <h6 className="dropdown-header">
-                                {list.icon && <span className="me-1">{list.icon}</span>}
+                                {listIcon && <span className="me-1">{listIcon}</span>}
                                 {list.name}
                             </h6>
                             {list.slots.length === 0 && (
@@ -95,9 +99,9 @@ export function SlotSelect({
                                         className={`dropdown-item small ${isActive ? 'active' : ''}`}
                                         onClick={() => select(encoded)}
                                     >
-                                        {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1}{' '}
+                                        {listIcon ?? ''}{listIcon ? ' ' : ''}#{i + 1}{' '}
                                         <span style={{
-                                            color: isActive ? undefined : readableColor(getClassColor(slot.playerClassId)),
+                                            color: isActive ? undefined : readableColor(getClassColor(refs, slot.playerClassId)),
                                             opacity: 0.7,
                                         }}>
                                             ({slot.playerName})
@@ -106,7 +110,7 @@ export function SlotSelect({
                                 )
                             })}
                         </div>
-                    ))}
+                    )})}
                 </div>
             )}
         </div>

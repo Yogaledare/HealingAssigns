@@ -14,6 +14,7 @@ public class HealingAssignsDb : DbContext
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<Symbol> Symbols => Set<Symbol>();
     public DbSet<PlayerClass> PlayerClasses => Set<PlayerClass>();
+    public DbSet<Role> Roles => Set<Role>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,6 +69,18 @@ public class HealingAssignsDb : DbContext
             .WithMany()
             .HasForeignKey(s => s.PlayerClassId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<RoleList>()
+            .HasOne(r => r.Role)
+            .WithMany()
+            .HasForeignKey(r => r.RoleId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Role>().HasData(
+            new Role { Id = 1, Name = "Healer", Icon = "🩹" },
+            new Role { Id = 2, Name = "Tank", Icon = "🛡️" },
+            new Role { Id = 3, Name = "DPS", Icon = "⚔️" }
+        );
 
         modelBuilder.Entity<PlayerClass>().HasData(
             new PlayerClass { Id = 1, Name = "Warrior", Color = "#C69B6D" },

@@ -8,7 +8,7 @@ namespace HealingAssigns.Api.Services;
 
 public class RoleListService(HealingAssignsDb db, LookupCache lookup)
 {
-    public async Task<RoleListDto> Create(int sessionId, string name, string? icon)
+    public async Task<RoleListDto> Create(int sessionId, string name, int? roleId)
     {
         var maxSort = await db.RoleLists
             .Where(r => r.SessionId == sessionId)
@@ -18,24 +18,24 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
         {
             SessionId = sessionId,
             Name = name,
-            Icon = icon,
+            RoleId = roleId,
             SortOrder = maxSort + 1
         };
         db.RoleLists.Add(roleList);
         await db.SaveChangesAsync();
-        return roleList.ToDto([], lookup.PlayerClassName);
+        return roleList.ToDto([], lookup.PlayerClassName, lookup.RoleName);
     }
 
-    public async Task<RoleListDto?> Update(int id, string name, string? icon)
+    public async Task<RoleListDto?> Update(int id, string name, int? roleId)
     {
         var roleList = await db.RoleLists
             .Include(r => r.Slots.OrderBy(s => s.SortOrder))
             .FirstOrDefaultAsync(r => r.Id == id);
         if (roleList is null) return null;
         roleList.Name = name;
-        roleList.Icon = icon;
+        roleList.RoleId = roleId;
         await db.SaveChangesAsync();
-        return roleList.ToDto(roleList.Slots, lookup.PlayerClassName);
+        return roleList.ToDto(roleList.Slots, lookup.PlayerClassName, lookup.RoleName);
     }
 
     public async Task<bool> Delete(int id)

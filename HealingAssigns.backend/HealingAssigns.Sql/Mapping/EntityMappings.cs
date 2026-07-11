@@ -11,8 +11,9 @@ public static class EntityMappings
     public static SessionDto ToDto(this Session s, List<RoleListDto> roleLists, List<EncounterDto> encounters) =>
         new(s.Id, s.Name, s.CreatedAt, roleLists, encounters);
 
-    public static RoleListDto ToDto(this RoleList r, IEnumerable<RoleSlot> slots, Func<int?, string?> playerClassName) => new(
-        r.Id, r.Name, r.Icon, r.SortOrder,
+    public static RoleListDto ToDto(this RoleList r, IEnumerable<RoleSlot> slots,
+        Func<int?, string?> playerClassName, Func<int?, string?> roleName) => new(
+        r.Id, r.Name, r.RoleId, roleName(r.RoleId), r.SortOrder,
         slots.Select(s => s.ToDto(playerClassName)).ToList()
     );
 

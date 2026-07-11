@@ -3,17 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Session, Encounter, Assignment } from '../api'
 import * as api from '../api'
 import { SlotSelect, decodeSlot } from './SlotSelect'
-
-const RAID_SYMBOLS = [
-    { id: 1, name: 'Skull', emoji: '💀' },
-    { id: 2, name: 'Star', emoji: '⭐' },
-    { id: 3, name: 'Circle', emoji: '🟠' },
-    { id: 4, name: 'Diamond', emoji: '🔶' },
-    { id: 5, name: 'Triangle', emoji: '🔺' },
-    { id: 6, name: 'Square', emoji: '🟦' },
-    { id: 7, name: 'Moon', emoji: '🌙' },
-    { id: 8, name: 'Cross', emoji: '❌' },
-]
+import { useReferences } from '../hooks/useReferences'
 
 function encodeSlot(roleListId: number, position: number) {
     return `${roleListId}:${position}`
@@ -173,6 +163,8 @@ function AssignmentRow({
     onUpdate: (a: Assignment) => void
     onRemove: () => void
 }) {
+    const { data: refs } = useReferences()
+
     const handleChange = (patch: Partial<Assignment>) => {
         onUpdate({ ...assignment, ...patch })
     }
@@ -192,9 +184,9 @@ function AssignmentRow({
                     onChange={(e) => handleChange({ symbolId: e.target.value ? Number(e.target.value) : null })}
                 >
                     <option value="">None</option>
-                    {RAID_SYMBOLS.map((s) => (
+                    {refs?.symbols.map((s) => (
                         <option key={s.id} value={s.id}>
-                            {s.emoji} {s.name}
+                            {s.name}
                         </option>
                     ))}
                 </select>
@@ -280,8 +272,7 @@ function MacroOutput({ text }: { text: string }) {
 
 function buildMacro(encounter: Encounter, session: Session): string {
     const lines = encounter.assignments.map((a) => {
-        const symbol = a.symbolId ? RAID_SYMBOLS.find((s) => s.id === a.symbolId) : null
-        const marker = symbol ? `{${symbol.name.toLowerCase()}}` : ''
+        const marker = a.symbolName ? `{${a.symbolName.toLowerCase()}}` : ''
         const assigneeList = session.roleLists.find((r) => r.id === a.assigneeRoleListId)
         const assignee = assigneeList?.slots[a.assigneePosition - 1]?.playerName ?? '?'
 

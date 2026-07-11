@@ -28,7 +28,7 @@ public class SessionService(HealingAssignsDb db, LookupCache lookup)
         if (session is null) return null;
 
         return session.ToDto(
-            session.RoleLists.Select(r => r.ToDto(r.Slots, lookup.PlayerClassName)).ToList(),
+            session.RoleLists.Select(r => r.ToDto(r.Slots, lookup.PlayerClassName, lookup.RoleName)).ToList(),
             session.Encounters.Select(e => e.ToDto(e.Assignments, lookup.SymbolName)).ToList()
         );
     }

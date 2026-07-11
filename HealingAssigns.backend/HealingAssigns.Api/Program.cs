@@ -70,5 +70,6 @@ app.MapSessionEndpoints();
 app.MapRoleListEndpoints();
 app.MapEncounterEndpoints();
 app.MapAssignmentEndpoints();
+app.MapReferenceEndpoints();
 
 app.Run();
