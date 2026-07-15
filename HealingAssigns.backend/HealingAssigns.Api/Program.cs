@@ -22,6 +22,7 @@ builder.Services.AddScoped<SessionService>();
 builder.Services.AddScoped<RoleListService>();
 builder.Services.AddScoped<EncounterService>();
 builder.Services.AddScoped<AssignmentService>();
+builder.Services.AddScoped<PlayerService>();
 builder.Services.AddSingleton<LookupCache>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,5 +72,6 @@ app.MapRoleListEndpoints();
 app.MapEncounterEndpoints();
 app.MapAssignmentEndpoints();
 app.MapReferenceEndpoints();
+app.MapPlayerEndpoints();
 
 app.Run();

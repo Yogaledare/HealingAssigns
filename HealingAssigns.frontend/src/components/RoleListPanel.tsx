@@ -1,32 +1,43 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-    DndContext,
-    closestCenter,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragOverlay,
-    type DragStartEvent,
-    type DragEndEvent,
-} from '@dnd-kit/core'
-import {
     SortableContext,
     useSortable,
     verticalListSortingStrategy,
-    arrayMove,
     defaultAnimateLayoutChanges,
     type AnimateLayoutChanges,
 } from '@dnd-kit/sortable'
+import { useDroppable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import type { Session, RoleList, RoleSlot } from '../api'
 import * as api from '../api'
 import { readableColor, isLightColor } from '../lib/color'
 import { useReferences, getClassColor } from '../hooks/useReferences'
+import { useDragDropContext } from './DragDropProvider'
+import { slotId, emptySlotId } from '../lib/dragIds'
 
-// --- Small presentational components ---
+function SlotNumber({ n }: { n: number }) {
+    return (
+        <div
+            className="d-flex align-items-center justify-content-center fw-bold"
+            style={{
+                width: 24,
+                height: 24,
+                borderRadius: 4,
+                backgroundColor: '#e9ecef',
+                color: '#495057',
+                fontSize: '0.75rem',
+                flexShrink: 0,
+                userSelect: 'none',
+                fontFamily: 'monospace',
+            }}
+        >
+            {n}
+        </div>
+    )
+}
 
-function SlotBadge({ slot }: { slot: RoleSlot }) {
+function SlotBadge({ slot, ghost }: { slot: RoleSlot; ghost?: boolean }) {
     const { data: refs } = useReferences()
     const color = getClassColor(refs, slot.playerClassId)
     const light = isLightColor(color)
@@ -37,6 +48,7 @@ function SlotBadge({ slot }: { slot: RoleSlot }) {
                 backgroundColor: light ? readableColor(color) : (color ?? '#6c757d'),
                 color: '#fff',
                 fontSize: '0.8rem',
+                opacity: ghost ? 0.4 : 1,
             }}
         >
             {slot.playerName}
@@ -44,53 +56,18 @@ function SlotBadge({ slot }: { slot: RoleSlot }) {
     )
 }
 
-function AddSlotForm({
-    onAdd,
-}: {
-    onAdd: (name: string, playerClassId: number | null) => void
-}) {
-    const { data: refs } = useReferences()
-    const [name, setName] = useState('')
-    const [cls, setCls] = useState('')
-
-    const handleAdd = () => {
-        if (!name.trim()) return
-        onAdd(name.trim(), cls ? Number(cls) : null)
-        setName('')
-        setCls('')
-    }
-
-    return (
-        <div className="input-group input-group-sm">
-            <input
-                className="form-control"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-            />
-            <select
-                className="form-select"
-                value={cls}
-                onChange={(e) => setCls(e.target.value)}
-                style={{ maxWidth: 100 }}
-            >
-                <option value="">Class</option>
-                {refs?.playerClasses.map((c) => (
-                    <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
-                ))}
-            </select>
-            <button className="btn btn-primary" onClick={handleAdd}>+</button>
-        </div>
-    )
-}
-
-// --- Drag-and-drop slot ---
-
 const noAnimateOnDrop: AnimateLayoutChanges = (args) =>
     args.isSorting || args.wasDragging ? false : defaultAnimateLayoutChanges(args)
 
-function SortableSlot({ slot, onRemove }: { slot: RoleSlot; onRemove: () => void }) {
+function SortableSlot({
+    slot,
+    ghost,
+    onRemove,
+}: {
+    slot: RoleSlot
+    ghost?: boolean
+    onRemove: () => void
+}) {
     const {
         attributes,
         listeners,
@@ -98,14 +75,14 @@ function SortableSlot({ slot, onRemove }: { slot: RoleSlot; onRemove: () => void
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: slot.id, animateLayoutChanges: noAnimateOnDrop })
+    } = useSortable({ id: slotId(slot.id), animateLayoutChanges: noAnimateOnDrop })
 
     return (
         <div
             ref={setNodeRef}
             {...attributes}
             {...listeners}
-            className="row align-items-center gx-2"
+            className="d-flex align-items-center gap-2"
             style={{
                 transform: CSS.Transform.toString(transform),
                 transition,
@@ -113,65 +90,58 @@ function SortableSlot({ slot, onRemove }: { slot: RoleSlot; onRemove: () => void
                 cursor: 'grab',
             }}
         >
-            <div className="col">
-                <SlotBadge slot={slot} />
+            <div className="flex-grow-1">
+                <SlotBadge slot={slot} ghost={ghost} />
             </div>
-            <div className="col-auto">
-                <small className="text-secondary">{slot.playerClassName ?? ''}</small>
-            </div>
-            <div className="col-auto">
-                <button
-                    className="btn btn-sm btn-outline-danger"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={onRemove}
-                >
-                    Delete
-                </button>
-            </div>
+            <small className="text-secondary">{slot.playerClassName ?? ''}</small>
+            <button
+                className="btn btn-sm btn-outline-danger py-0 px-1"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); onRemove() }}
+                style={{ fontSize: '0.65rem' }}
+            >
+                ×
+            </button>
         </div>
     )
 }
 
-// --- Role list card with sortable slot list ---
+function EmptySlot({ highlight }: { highlight: boolean }) {
+    return (
+        <div
+            className="d-flex align-items-center"
+            style={{
+                height: 28,
+                border: '1px dashed',
+                borderColor: highlight ? '#0d6efd' : '#dee2e6',
+                borderRadius: 4,
+                backgroundColor: highlight ? 'rgba(13,110,253,0.05)' : undefined,
+                transition: 'all 0.15s',
+            }}
+        />
+    )
+}
 
 function RoleListCard({
     list,
-    onAddSlot,
     onRemoveSlot,
     onRemoveList,
     onUpdateIcon,
-    onReorder,
+    onUpdateSlotCount,
 }: {
     list: RoleList
-    onAddSlot: (name: string, playerClassId: number | null) => void
     onRemoveSlot: (id: number) => void
     onRemoveList: () => void
     onUpdateIcon: (icon: string | null) => void
-    onReorder: (slotIds: number[]) => void
+    onUpdateSlotCount: (count: number) => void
 }) {
-    const [activeId, setActiveId] = useState<number | null>(null)
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    )
-
-    const handleDragStart = (event: DragStartEvent) => {
-        setActiveId(event.active.id as number)
-    }
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        setActiveId(null)
-        const { active, over } = event
-        if (!over || active.id === over.id) return
-        const oldIndex = list.slots.findIndex((s) => s.id === active.id)
-        const newIndex = list.slots.findIndex((s) => s.id === over.id)
-        onReorder(arrayMove(list.slots.map((s) => s.id), oldIndex, newIndex))
-    }
-
-    const activeSlot = activeId ? list.slots.find((s) => s.id === activeId) : null
+    const { hoverRoleListId, isDraggingPlayer, playerActiveMap } = useDragDropContext()
+    const { setNodeRef } = useDroppable({ id: emptySlotId(list.id, 0) })
+    const emptyCount = Math.max(0, list.slotCount - list.slots.length)
+    const isHovered = isDraggingPlayer && hoverRoleListId === list.id && emptyCount > 0
 
     return (
-        <div className="card">
+        <div className="card" ref={emptyCount > 0 ? setNodeRef : undefined}>
             <div className="card-body p-3">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                     <div className="d-flex align-items-center gap-1">
@@ -184,54 +154,64 @@ function RoleListCard({
                         />
                         <h6 className="mb-0 fw-semibold">{list.name}</h6>
                     </div>
-                    <button className="btn btn-sm btn-outline-danger" onClick={onRemoveList}>
-                        Delete
-                    </button>
+                    <div className="d-flex align-items-center gap-1">
+                        <button
+                            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center p-0"
+                            onClick={() => onUpdateSlotCount(list.slotCount + 1)}
+                            title="Add slot"
+                            style={{ width: 24, height: 24 }}
+                        >
+                            <i className="fa-solid fa-plus" style={{ fontSize: '0.6rem' }} />
+                        </button>
+                        <button
+                            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center p-0"
+                            onClick={() => onUpdateSlotCount(list.slotCount - 1)}
+                            title="Remove empty slot"
+                            disabled={emptyCount === 0}
+                            style={{ width: 24, height: 24 }}
+                        >
+                            <i className="fa-solid fa-minus" style={{ fontSize: '0.6rem' }} />
+                        </button>
+                        <button className="btn btn-sm btn-outline-danger" onClick={onRemoveList}>
+                            Delete
+                        </button>
+                    </div>
                 </div>
 
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
+                <SortableContext
+                    items={list.slots.map((s) => slotId(s.id))}
+                    strategy={verticalListSortingStrategy}
                 >
-                    <SortableContext
-                        items={list.slots.map((s) => s.id)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        <div className="mb-2">
-                            {list.slots.map((slot, i) => (
-                                <div key={slot.id} className="row align-items-center gx-2 py-1">
-                                    <div
-                                        className="col-auto text-secondary fw-bold text-end"
-                                        style={{ width: 24, fontSize: '0.85rem', userSelect: 'none' }}
-                                    >
-                                        {i + 1}
-                                    </div>
-                                    <div className="col">
-                                        <SortableSlot
-                                            slot={slot}
-                                            onRemove={() => onRemoveSlot(slot.id)}
-                                        />
-                                    </div>
+                    <div className="mb-2">
+                        {list.slots.map((slot, i) => (
+                            <div key={slot.id} className="d-flex align-items-center gap-2 py-1">
+                                <SlotNumber n={i + 1} />
+                                <div className="flex-grow-1">
+                                    <SortableSlot
+                                        slot={slot}
+                                        ghost={slot.playerId != null && playerActiveMap.get(slot.playerId) === false}
+                                        onRemove={() => onRemoveSlot(slot.id)}
+                                    />
                                 </div>
-                            ))}
-                        </div>
-                    </SortableContext>
-                    <DragOverlay dropAnimation={null}>
-                        {activeSlot && <SlotBadge slot={activeSlot} />}
-                    </DragOverlay>
-                </DndContext>
+                            </div>
+                        ))}
+                        {Array.from({ length: emptyCount }, (_, i) => (
+                            <div key={`empty-${i}`} className="d-flex align-items-center gap-2 py-1">
+                                <SlotNumber n={list.slots.length + i + 1} />
+                                <div className="flex-grow-1">
+                                    <EmptySlot highlight={i === 0 && isHovered} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </SortableContext>
 
-                <AddSlotForm onAdd={onAddSlot} />
             </div>
         </div>
     )
 }
 
-// --- Top-level panel with mutations ---
-
-export function RoleListPanel({ session }: { session: Session }) {
+export function RoleListPanel({ session, onToggleRoster, rosterOpen }: { session: Session; onToggleRoster: () => void; rosterOpen: boolean }) {
     const queryClient = useQueryClient()
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ['session', session.id] })
 
@@ -252,37 +232,16 @@ export function RoleListPanel({ session }: { session: Session }) {
         onSuccess: invalidate,
     })
 
-    const addSlot = useMutation({
-        mutationFn: (args: { roleListId: number; playerName: string; playerClassId: number | null }) =>
-            api.createSlot(args.roleListId, args.playerName, args.playerClassId),
-        onSuccess: invalidate,
-    })
-
     const removeSlot = useMutation({
         mutationFn: (id: number) => api.deleteSlot(id),
         onSuccess: invalidate,
     })
 
-    const reorderSlots = useMutation({
-        mutationFn: (args: { roleListId: number; slotIds: number[] }) =>
-            api.reorderSlots(args.roleListId, args.slotIds),
-        onSettled: invalidate,
+    const updateSlotCount = useMutation({
+        mutationFn: (args: { id: number; count: number }) =>
+            api.updateSlotCount(args.id, args.count),
+        onSuccess: invalidate,
     })
-
-    const handleReorder = (roleListId: number, slotIds: number[]) => {
-        queryClient.setQueryData<Session>(['session', session.id], (old) => {
-            if (!old) return old
-            return {
-                ...old,
-                roleLists: old.roleLists.map((rl) => {
-                    if (rl.id !== roleListId) return rl
-                    const slotMap = new Map(rl.slots.map((s) => [s.id, s]))
-                    return { ...rl, slots: slotIds.map((id) => slotMap.get(id)!) }
-                }),
-            }
-        })
-        reorderSlots.mutate({ roleListId, slotIds })
-    }
 
     const [newListName, setNewListName] = useState('')
     const [newListIcon, setNewListIcon] = useState('')
@@ -300,9 +259,17 @@ export function RoleListPanel({ session }: { session: Session }) {
         <div>
             <div className="d-flex align-items-center justify-content-between mb-3">
                 <h5 className="mb-0">Role Lists</h5>
-                <button className="btn btn-primary btn-sm" onClick={() => setShowAddForm(!showAddForm)}>
-                    + List
-                </button>
+                <div className="d-flex gap-1">
+                    <button
+                        className={`btn btn-sm ${rosterOpen ? 'btn-secondary' : 'btn-outline-secondary'}`}
+                        onClick={onToggleRoster}
+                    >
+                        <i className="fa-solid fa-users" />
+                    </button>
+                    <button className="btn btn-primary btn-sm" onClick={() => setShowAddForm(!showAddForm)}>
+                        + List
+                    </button>
+                </div>
             </div>
 
             {showAddForm && (
@@ -339,13 +306,10 @@ export function RoleListPanel({ session }: { session: Session }) {
                     <RoleListCard
                         key={list.id}
                         list={list}
-                        onAddSlot={(name, playerClassId) =>
-                            addSlot.mutate({ roleListId: list.id, playerName: name, playerClassId })
-                        }
                         onRemoveSlot={(id) => removeSlot.mutate(id)}
                         onRemoveList={() => removeList.mutate(list.id)}
                         onUpdateIcon={(icon) => updateList.mutate({ id: list.id, name: list.name, icon })}
-                        onReorder={(slotIds) => handleReorder(list.id, slotIds)}
+                        onUpdateSlotCount={(count) => updateSlotCount.mutate({ id: list.id, count })}
                     />
                 ))}
             </div>

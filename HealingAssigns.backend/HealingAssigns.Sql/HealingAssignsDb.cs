@@ -14,6 +14,9 @@ public class HealingAssignsDb : DbContext
     public DbSet<Assignment> Assignments => Set<Assignment>();
     public DbSet<Symbol> Symbols => Set<Symbol>();
     public DbSet<PlayerClass> PlayerClasses => Set<PlayerClass>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Spec> Specs => Set<Spec>();
+    public DbSet<Player> Players => Set<Player>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -69,6 +72,38 @@ public class HealingAssignsDb : DbContext
             .HasForeignKey(s => s.PlayerClassId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        modelBuilder.Entity<RoleSlot>()
+            .HasOne(s => s.Player)
+            .WithMany()
+            .HasForeignKey(s => s.PlayerId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Spec>()
+            .HasOne(s => s.PlayerClass)
+            .WithMany()
+            .HasForeignKey(s => s.PlayerClassId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Spec>()
+            .HasOne(s => s.Role)
+            .WithMany()
+            .HasForeignKey(s => s.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Spec>()
+            .HasIndex(s => s.RaidHelperKey)
+            .IsUnique();
+
+        modelBuilder.Entity<Player>()
+            .HasOne(p => p.Spec)
+            .WithMany()
+            .HasForeignKey(p => p.SpecId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Player>()
+            .HasIndex(p => p.Name)
+            .IsUnique();
+
         modelBuilder.Entity<PlayerClass>().HasData(
             new PlayerClass { Id = 1, Name = "Warrior", Color = "#C69B6D", Icon = "⚔️" },
             new PlayerClass { Id = 2, Name = "Priest", Color = "#FFFFFF", Icon = "🙏" },
@@ -90,6 +125,53 @@ public class HealingAssignsDb : DbContext
             new Symbol { Id = 6, Name = "Square", Icon = "🟦" },
             new Symbol { Id = 7, Name = "Moon", Icon = "🌙" },
             new Symbol { Id = 8, Name = "Cross", Icon = "❌" }
+        );
+
+        modelBuilder.Entity<Role>().HasData(
+            new Role { Id = 1, Name = "Healer" },
+            new Role { Id = 2, Name = "Tank" },
+            new Role { Id = 3, Name = "Dps" }
+        );
+
+        modelBuilder.Entity<Spec>().HasData(
+            // Warrior (ClassId=1)
+            new Spec { Id = 1, Name = "Arms", RaidHelperKey = "Arms", PlayerClassId = 1, RoleId = 3 },
+            new Spec { Id = 2, Name = "Fury", RaidHelperKey = "Fury", PlayerClassId = 1, RoleId = 3 },
+            new Spec { Id = 3, Name = "Protection", RaidHelperKey = "Protection", PlayerClassId = 1, RoleId = 2 },
+            // Priest (ClassId=2)
+            new Spec { Id = 4, Name = "Discipline", RaidHelperKey = "Discipline", PlayerClassId = 2, RoleId = 1 },
+            new Spec { Id = 5, Name = "Holy", RaidHelperKey = "Holy", PlayerClassId = 2, RoleId = 1 },
+            new Spec { Id = 6, Name = "Shadow", RaidHelperKey = "Shadow", PlayerClassId = 2, RoleId = 3 },
+            // Mage (ClassId=3)
+            new Spec { Id = 7, Name = "Arcane", RaidHelperKey = "Arcane", PlayerClassId = 3, RoleId = 3 },
+            new Spec { Id = 8, Name = "Fire", RaidHelperKey = "Fire", PlayerClassId = 3, RoleId = 3 },
+            new Spec { Id = 9, Name = "Frost", RaidHelperKey = "Frost", PlayerClassId = 3, RoleId = 3 },
+            // Druid (ClassId=4)
+            new Spec { Id = 10, Name = "Balance", RaidHelperKey = "Balance", PlayerClassId = 4, RoleId = 3 },
+            new Spec { Id = 11, Name = "Feral", RaidHelperKey = "Feral", PlayerClassId = 4, RoleId = 3 },
+            new Spec { Id = 12, Name = "Guardian", RaidHelperKey = "Guardian", PlayerClassId = 4, RoleId = 2 },
+            new Spec { Id = 13, Name = "Restoration", RaidHelperKey = "Restoration", PlayerClassId = 4, RoleId = 1 },
+            new Spec { Id = 14, Name = "Dreamstate", RaidHelperKey = "Dreamstate", PlayerClassId = 4, RoleId = 1 },
+            // Hunter (ClassId=5)
+            new Spec { Id = 15, Name = "Beast Mastery", RaidHelperKey = "Beastmastery", PlayerClassId = 5, RoleId = 3 },
+            new Spec { Id = 16, Name = "Marksmanship", RaidHelperKey = "Marksmanship", PlayerClassId = 5, RoleId = 3 },
+            new Spec { Id = 17, Name = "Survival", RaidHelperKey = "Survival", PlayerClassId = 5, RoleId = 3 },
+            // Rogue (ClassId=6)
+            new Spec { Id = 18, Name = "Assassination", RaidHelperKey = "Assassination", PlayerClassId = 6, RoleId = 3 },
+            new Spec { Id = 19, Name = "Combat", RaidHelperKey = "Combat", PlayerClassId = 6, RoleId = 3 },
+            new Spec { Id = 20, Name = "Subtlety", RaidHelperKey = "Subtlety", PlayerClassId = 6, RoleId = 3 },
+            // Shaman (ClassId=7)
+            new Spec { Id = 21, Name = "Elemental", RaidHelperKey = "Elemental", PlayerClassId = 7, RoleId = 3 },
+            new Spec { Id = 22, Name = "Enhancement", RaidHelperKey = "Enhancement", PlayerClassId = 7, RoleId = 3 },
+            new Spec { Id = 23, Name = "Restoration", RaidHelperKey = "Restoration1", PlayerClassId = 7, RoleId = 1 },
+            // Paladin (ClassId=8)
+            new Spec { Id = 24, Name = "Holy", RaidHelperKey = "Holy1", PlayerClassId = 8, RoleId = 1 },
+            new Spec { Id = 25, Name = "Protection", RaidHelperKey = "Protection1", PlayerClassId = 8, RoleId = 2 },
+            new Spec { Id = 26, Name = "Retribution", RaidHelperKey = "Retribution", PlayerClassId = 8, RoleId = 3 },
+            // Warlock (ClassId=9)
+            new Spec { Id = 27, Name = "Affliction", RaidHelperKey = "Affliction", PlayerClassId = 9, RoleId = 3 },
+            new Spec { Id = 28, Name = "Demonology", RaidHelperKey = "Demonology", PlayerClassId = 9, RoleId = 3 },
+            new Spec { Id = 29, Name = "Destruction", RaidHelperKey = "Destruction", PlayerClassId = 9, RoleId = 3 }
         );
     }
 }

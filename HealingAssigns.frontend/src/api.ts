@@ -39,6 +39,7 @@ export interface RoleList {
   name: string
   icon: string | null
   sortOrder: number
+  slotCount: number
   slots: RoleSlot[]
 }
 
@@ -55,9 +56,24 @@ export interface PlayerClassRef {
   icon: string
 }
 
+export interface RoleRef {
+  id: number
+  name: string
+}
+
+export interface SpecRef {
+  id: number
+  name: string
+  playerClassId: number
+  roleId: number
+  raidHelperKey: string
+}
+
 export interface References {
   symbols: SymbolRef[]
   playerClasses: PlayerClassRef[]
+  roles: RoleRef[]
+  specs: SpecRef[]
 }
 
 export interface RoleSlot {
@@ -65,7 +81,34 @@ export interface RoleSlot {
   playerName: string
   playerClassId: number | null
   playerClassName: string | null
+  playerId: number | null
   sortOrder: number
+}
+
+export interface Player {
+  id: number
+  name: string
+  specId: number
+  specName: string
+  playerClassId: number
+  playerClassName: string
+  playerClassColor: string
+  roleId: number
+  roleName: string
+  isActive: boolean
+  lastActivatedAt: string | null
+}
+
+export interface ImportedPlayer {
+  name: string
+  specName: string | null
+  className: string | null
+  status: string
+  signupStatus: string
+}
+
+export interface ImportPlayersResponse {
+  players: ImportedPlayer[]
 }
 
 export interface Encounter {
@@ -156,12 +199,22 @@ export async function deleteRoleList(id: number): Promise<void> {
 // Slots
 export async function createSlot(
   roleListId: number,
-  playerName: string,
-  playerClassId?: number | null,
+  playerId: number,
 ): Promise<RoleSlot> {
   const res = await apiFetch(`/rolelists/${roleListId}/slots`, {
     method: 'POST',
-    body: JSON.stringify({ playerName, playerClassId: playerClassId ?? null }),
+    body: JSON.stringify({ playerId }),
+  })
+  return res.json()
+}
+
+export async function updateSlotCount(
+  roleListId: number,
+  slotCount: number,
+): Promise<RoleList> {
+  const res = await apiFetch(`/rolelists/${roleListId}/slotcount`, {
+    method: 'PUT',
+    body: JSON.stringify({ slotCount }),
   })
   return res.json()
 }
@@ -233,4 +286,52 @@ export async function updateAssignment(
 
 export async function deleteAssignment(id: number): Promise<void> {
   await apiFetch(`/assignments/${id}`, { method: 'DELETE' })
+}
+
+// Players
+export async function getPlayers(): Promise<Player[]> {
+  const res = await apiFetch('/players')
+  return res.json()
+}
+
+export async function createPlayer(name: string, specId: number): Promise<Player> {
+  const res = await apiFetch('/players', {
+    method: 'POST',
+    body: JSON.stringify({ name, specId }),
+  })
+  return res.json()
+}
+
+export async function updatePlayer(id: number, name: string, specId: number): Promise<Player> {
+  const res = await apiFetch(`/players/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ name, specId }),
+  })
+  return res.json()
+}
+
+export async function deletePlayer(id: number): Promise<void> {
+  await apiFetch(`/players/${id}`, { method: 'DELETE' })
+}
+
+export async function importPlayers(text: string): Promise<ImportPlayersResponse> {
+  const res = await apiFetch('/players/import', {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  })
+  return res.json()
+}
+
+export async function activatePlayer(id: number): Promise<Player> {
+  const res = await apiFetch(`/players/${id}/activate`, { method: 'POST' })
+  return res.json()
+}
+
+export async function deactivatePlayer(id: number): Promise<Player> {
+  const res = await apiFetch(`/players/${id}/deactivate`, { method: 'POST' })
+  return res.json()
+}
+
+export async function deactivateAllPlayers(): Promise<void> {
+  await apiFetch('/players/deactivate-all', { method: 'POST' })
 }

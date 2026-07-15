@@ -11,4 +11,7 @@ public class RoleSlot
 
     public int? PlayerClassId { get; set; }
     public PlayerClass? PlayerClass { get; set; }
+
+    public int? PlayerId { get; set; }
+    public Player? Player { get; set; }
 }

@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Routes, Route, useParams, useNavigate, Link } from 'react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './auth'
 import * as api from './api'
 import { RoleListPanel } from './components/RoleListPanel'
 import { EncounterPanel } from './components/EncounterPanel'
+import { RosterPanel } from './components/RosterPanel'
+import { DragDropProvider } from './components/DragDropProvider'
 
 function App() {
     const { user } = useAuth()
@@ -91,6 +94,7 @@ function SessionList() {
 function SessionView() {
     const { user, logout } = useAuth()
     const { id } = useParams()
+    const [rosterOpen, setRosterOpen] = useState(false)
 
     const { data: session, isPending } = useQuery({
         queryKey: ['session', Number(id)],
@@ -121,14 +125,36 @@ function SessionView() {
                     </div>
                     <p className="text-secondary mt-3 mb-0">Loading session...</p>
                 </div>
-            ) : (
-                <div className="row g-0 flex-grow-1 overflow-hidden">
-                    <div className="col overflow-auto p-3">
-                        {session && <EncounterPanel session={session} />}
-                    </div>
-                    <div className="col-auto border-start overflow-auto p-3" style={{ width: 340 }}>
-                        {session && <RoleListPanel session={session} />}
-                    </div>
+            ) : session && (
+                <div className="flex-grow-1 position-relative overflow-hidden">
+                    <DragDropProvider session={session}>
+                        <div className="row g-0 h-100 flex-nowrap">
+                            <div className="col overflow-auto p-3">
+                                <EncounterPanel session={session} />
+                            </div>
+                            <div className="col-auto border-start overflow-auto p-3" style={{ width: 340 }}>
+                                <RoleListPanel session={session} onToggleRoster={() => setRosterOpen(!rosterOpen)} rosterOpen={rosterOpen} />
+                            </div>
+                        </div>
+                        {rosterOpen && (
+                            <div
+                                className="bg-white p-3 border-end"
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 340,
+                                    bottom: 0,
+                                    width: 720,
+                                    overflowY: 'auto',
+                                    overflowX: 'hidden',
+                                    boxShadow: '-4px 0 12px rgba(0,0,0,0.1)',
+                                    zIndex: 10,
+                                }}
+                            >
+                                <RosterPanel session={session} />
+                            </div>
+                        )}
+                    </DragDropProvider>
                 </div>
             )}
         </div>

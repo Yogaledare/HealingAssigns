@@ -13,12 +13,12 @@ public static class EntityMappings
 
     public static RoleListDto ToDto(this RoleList r, IEnumerable<RoleSlot> slots,
         Func<int?, string?> playerClassName) => new(
-        r.Id, r.Name, r.Icon, r.SortOrder,
+        r.Id, r.Name, r.Icon, r.SortOrder, r.SlotCount,
         slots.Select(s => s.ToDto(playerClassName)).ToList()
     );
 
     public static RoleSlotDto ToDto(this RoleSlot s, Func<int?, string?> playerClassName) =>
-        new(s.Id, s.PlayerName, s.PlayerClassId, playerClassName(s.PlayerClassId), s.SortOrder);
+        new(s.Id, s.PlayerName, s.PlayerClassId, playerClassName(s.PlayerClassId), s.PlayerId, s.SortOrder);
 
     public static EncounterDto ToDto(this Encounter e, IEnumerable<Assignment> assignments, Func<int?, string?> symbolName) => new(
         e.Id, e.Name, e.SortOrder,

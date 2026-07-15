@@ -4,6 +4,7 @@ using HealingAssigns.Sql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealingAssigns.Sql.Migrations
 {
     [DbContext(typeof(HealingAssignsDb))]
-    partial class HealingAssignsDbModelSnapshot : ModelSnapshot
+    [Migration("20260712053026_AddRoleSpecPlayerTables")]
+    partial class AddRoleSpecPlayerTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,12 +104,6 @@ namespace HealingAssigns.Sql.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastActivatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -265,9 +262,6 @@ namespace HealingAssigns.Sql.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SessionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SlotCount")
                         .HasColumnType("int");
 
                     b.Property<int>("SortOrder")

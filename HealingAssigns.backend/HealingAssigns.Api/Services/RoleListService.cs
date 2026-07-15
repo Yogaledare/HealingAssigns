@@ -19,7 +19,8 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
             SessionId = sessionId,
             Name = name,
             Icon = icon,
-            SortOrder = maxSort + 1
+            SortOrder = maxSort + 1,
+            SlotCount = 0
         };
         db.RoleLists.Add(roleList);
         await db.SaveChangesAsync();
@@ -38,6 +39,18 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
         return roleList.ToDto(roleList.Slots, lookup.PlayerClassName);
     }
 
+    public async Task<RoleListDto?> UpdateSlotCount(int id, int slotCount)
+    {
+        var roleList = await db.RoleLists
+            .Include(r => r.Slots.OrderBy(s => s.SortOrder))
+            .FirstOrDefaultAsync(r => r.Id == id);
+        if (roleList is null) return null;
+        if (slotCount < roleList.Slots.Count) return null;
+        roleList.SlotCount = slotCount;
+        await db.SaveChangesAsync();
+        return roleList.ToDto(roleList.Slots, lookup.PlayerClassName);
+    }
+
     public async Task<bool> Delete(int id)
     {
         var roleList = await db.RoleLists.FindAsync(id);
@@ -47,19 +60,32 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
         return true;
     }
 
-    public async Task<RoleSlotDto> CreateSlot(int roleListId, string playerName, int? playerClassId)
+    public async Task<RoleSlotDto?> CreateSlot(int roleListId, int playerId)
     {
-        var maxSort = await db.RoleSlots
-            .Where(s => s.RoleListId == roleListId)
-            .MaxAsync(s => (int?)s.SortOrder) ?? -1;
+        var roleList = await db.RoleLists
+            .Include(r => r.Slots)
+            .FirstOrDefaultAsync(r => r.Id == roleListId);
+        if (roleList is null) return null;
+        if (roleList.Slots.Count >= roleList.SlotCount) return null;
+
+        var player = await db.Players
+            .Include(p => p.Spec)
+            .FirstOrDefaultAsync(p => p.Id == playerId);
+        if (player is null) return null;
+
+        var maxSort = roleList.Slots.Count > 0
+            ? roleList.Slots.Max(s => s.SortOrder)
+            : -1;
 
         var slot = new RoleSlot
         {
             RoleListId = roleListId,
-            PlayerName = playerName,
-            PlayerClassId = playerClassId,
+            PlayerName = player.Name,
+            PlayerClassId = player.Spec.PlayerClassId,
+            PlayerId = player.Id,
             SortOrder = maxSort + 1
         };
+
         db.RoleSlots.Add(slot);
         await db.SaveChangesAsync();
         return slot.ToDto(lookup.PlayerClassName);
@@ -69,8 +95,27 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
     {
         var slot = await db.RoleSlots.FindAsync(id);
         if (slot is null) return false;
+
+        var roleListId = slot.RoleListId;
         db.RoleSlots.Remove(slot);
         await db.SaveChangesAsync();
+
+        var remaining = await db.RoleSlots
+            .Where(s => s.RoleListId == roleListId)
+            .OrderBy(s => s.SortOrder)
+            .ToListAsync();
+
+        if (remaining.Count > 0)
+        {
+            foreach (var s in remaining)
+                s.SortOrder = -(s.SortOrder + 1);
+            await db.SaveChangesAsync();
+
+            for (var i = 0; i < remaining.Count; i++)
+                remaining[i].SortOrder = i;
+            await db.SaveChangesAsync();
+        }
+
         return true;
     }
 
