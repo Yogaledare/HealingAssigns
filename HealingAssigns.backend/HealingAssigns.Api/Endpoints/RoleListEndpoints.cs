@@ -17,19 +17,19 @@ public static class RoleListEndpoints
             await svc.Update(id, req.Name, req.Icon) is { } r ? Results.Ok(r) : Results.NotFound())
             .RequireAuthorization();
 
-        app.MapPut("/rolelists/{id}/slotcount", async (int id, UpdateSlotCountRequest req, RoleListService svc) =>
-            await svc.UpdateSlotCount(id, req.SlotCount) is { } r ? Results.Ok(r) : Results.NotFound())
-            .RequireAuthorization();
-
         app.MapDelete("/rolelists/{id}", async (int id, RoleListService svc) =>
             await svc.Delete(id) ? Results.NoContent() : Results.NotFound())
             .RequireAuthorization();
 
-        app.MapPost("/rolelists/{roleListId}/slots", async (int roleListId, CreateSlotRequest req, RoleListService svc) =>
+        app.MapPost("/rolelists/{roleListId}/slots", async (int roleListId, RoleListService svc) =>
         {
-            var slot = await svc.CreateSlot(roleListId, req.PlayerId);
+            var slot = await svc.AddSlot(roleListId);
             return slot is not null ? Results.Created($"/slots/{slot.Id}", slot) : Results.NotFound();
         }).RequireAuthorization();
+
+        app.MapPut("/slots/{id}/player", async (int id, SetSlotPlayerRequest req, RoleListService svc) =>
+            await svc.SetSlotPlayer(id, req.PlayerId) is { } s ? Results.Ok(s) : Results.NotFound())
+            .RequireAuthorization();
 
         app.MapDelete("/slots/{id}", async (int id, RoleListService svc) =>
             await svc.DeleteSlot(id) ? Results.NoContent() : Results.NotFound())

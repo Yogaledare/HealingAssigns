@@ -37,3 +37,6 @@ Desktop.ini
 infra/main.json
 applogs/
 applogs.zip
+
+# Local dev database (contains local sa password)
+docker-compose.yml

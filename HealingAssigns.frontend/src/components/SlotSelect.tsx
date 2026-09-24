@@ -1,16 +1,47 @@
 import { useState, useRef, useEffect } from 'react'
-import type { RoleList } from '../api'
+import type { RoleList, RoleSlot } from '../api'
 import { readableColor } from '../lib/color'
 import { useReferences, getClassColor } from '../hooks/useReferences'
+import { SlotNumberBadge } from './SlotNumberBadge'
 
-function encodeSlot(roleListId: number, position: number) {
-    return `${roleListId}:${position}`
+export function findSlot(roleLists: RoleList[], slotId: number | null): { slot: RoleSlot; list: RoleList; pos: number; listIndex: number } | null {
+    if (slotId == null) return null
+    for (let li = 0; li < roleLists.length; li++) {
+        const idx = roleLists[li].slots.findIndex((s) => s.id === slotId)
+        if (idx >= 0) return { slot: roleLists[li].slots[idx], list: roleLists[li], pos: idx + 1, listIndex: li }
+    }
+    return null
 }
 
-export function decodeSlot(value: string): { roleListId: number; position: number } | null {
-    if (!value) return null
-    const [listId, pos] = value.split(':')
-    return { roleListId: Number(listId), position: Number(pos) }
+function IdentityLabel({ list, pos, badgeSize = 20 }: { list: RoleList; pos: number; badgeSize?: number }) {
+    return (
+        <span className="d-inline-flex align-items-center gap-1">
+            <span
+                className="d-inline-flex justify-content-center flex-shrink-0"
+                style={{ width: badgeSize + 4 }}
+            >
+                {list.icon ?? ''}
+            </span>
+            <SlotNumberBadge n={pos} size={badgeSize} />
+            <span>{list.name}</span>
+        </span>
+    )
+}
+
+/** Shows who currently occupies a slot — the resolved person, not the assignment. */
+export function SlotOccupant({ roleLists, slotId }: { roleLists: RoleList[]; slotId: number | null }) {
+    const { data: refs } = useReferences()
+    const info = findSlot(roleLists, slotId)
+    if (!info) return <span className="text-secondary">—</span>
+    if (!info.slot.playerName) return <span className="text-secondary fst-italic">open</span>
+    return (
+        <span
+            className="fw-semibold"
+            style={{ color: readableColor(getClassColor(refs, info.slot.playerClassId)) }}
+        >
+            {info.slot.playerName}
+        </span>
+    )
 }
 
 export function SlotSelect({
@@ -18,11 +49,13 @@ export function SlotSelect({
     value,
     onChange,
     allowNone,
+    placeholder = '—',
 }: {
     roleLists: RoleList[]
-    value: string
-    onChange: (value: string) => void
+    value: number | null
+    onChange: (value: number | null) => void
     allowNone?: boolean
+    placeholder?: string
 }) {
     const { data: refs } = useReferences()
     const [open, setOpen] = useState(false)
@@ -37,15 +70,9 @@ export function SlotSelect({
         return () => document.removeEventListener('mousedown', handleClick)
     }, [open])
 
-    const selected = (() => {
-        const decoded = decodeSlot(value)
-        if (!decoded) return null
-        const list = roleLists.find((r) => r.id === decoded.roleListId)
-        const slot = list?.slots[decoded.position - 1] ?? null
-        return slot ? { slot, icon: list?.icon ?? null, position: decoded.position } : null
-    })()
+    const selected = findSlot(roleLists, value)
 
-    const select = (v: string) => {
+    const select = (v: number | null) => {
         onChange(v)
         setOpen(false)
     }
@@ -56,25 +83,18 @@ export function SlotSelect({
                 className="btn btn-outline-secondary btn-sm w-100 text-start"
                 onClick={() => setOpen(!open)}
             >
-                {selected ? (
-                    <>
-                        {selected.icon ?? ''}
-                        {selected.icon ? ' ' : ''}
-                        #{selected.position}{' '}
-                        <span style={{ color: readableColor(getClassColor(refs, selected.slot.playerClassId)), opacity: 0.7 }}>
-                            ({selected.slot.playerName})
-                        </span>
-                    </>
-                ) : '—'}
+                {selected
+                    ? <IdentityLabel list={selected.list} pos={selected.pos} />
+                    : placeholder}
             </button>
 
             {open && (
                 <div
                     className="position-absolute z-3 mt-1 bg-white border rounded shadow-sm overflow-auto"
-                    style={{ maxHeight: 240, minWidth: 180 }}
+                    style={{ maxHeight: 240, minWidth: 220 }}
                 >
                     {allowNone && (
-                        <button className="dropdown-item" onClick={() => select('')}>—</button>
+                        <button className="dropdown-item" onClick={() => select(null)}>—</button>
                     )}
                     {roleLists.map((list) => (
                         <div key={list.id}>
@@ -84,28 +104,28 @@ export function SlotSelect({
                             </h6>
                             {list.slots.length === 0 && (
                                 <span className="dropdown-item-text text-secondary fst-italic small">
-                                    (empty)
+                                    (no slots)
                                 </span>
                             )}
-                            {list.slots.map((slot, i) => {
-                                const encoded = encodeSlot(list.id, i + 1)
-                                const isActive = value === encoded
-                                return (
-                                    <button
-                                        key={slot.id}
-                                        className={`dropdown-item small ${isActive ? 'active' : ''}`}
-                                        onClick={() => select(encoded)}
-                                    >
-                                        {list.icon ?? ''}{list.icon ? ' ' : ''}#{i + 1}{' '}
+                            {list.slots.map((slot, i) => (
+                                <button
+                                    key={slot.id}
+                                    className={`dropdown-item small ${value === slot.id ? 'active' : ''}`}
+                                    onClick={() => select(slot.id)}
+                                >
+                                    <IdentityLabel list={list} pos={i + 1} badgeSize={18} />{' '}
+                                    {slot.playerName ? (
                                         <span style={{
-                                            color: isActive ? undefined : readableColor(getClassColor(refs, slot.playerClassId)),
-                                            opacity: 0.7,
+                                            color: value === slot.id ? undefined : readableColor(getClassColor(refs, slot.playerClassId)),
+                                            opacity: 0.6,
                                         }}>
                                             ({slot.playerName})
                                         </span>
-                                    </button>
-                                )
-                            })}
+                                    ) : (
+                                        <span className="fst-italic" style={{ opacity: 0.45 }}>(open)</span>
+                                    )}
+                                </button>
+                            ))}
                         </div>
                     ))}
                 </div>

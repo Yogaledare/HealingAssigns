@@ -13,20 +13,23 @@ public static class EntityMappings
 
     public static RoleListDto ToDto(this RoleList r, IEnumerable<RoleSlot> slots,
         Func<int?, string?> playerClassName) => new(
-        r.Id, r.Name, r.Icon, r.SortOrder, r.SlotCount,
+        r.Id, r.Name, r.Icon, r.SortOrder,
         slots.Select(s => s.ToDto(playerClassName)).ToList()
     );
 
-    public static RoleSlotDto ToDto(this RoleSlot s, Func<int?, string?> playerClassName) =>
-        new(s.Id, s.PlayerName, s.PlayerClassId, playerClassName(s.PlayerClassId), s.PlayerId, s.SortOrder);
+    public static RoleSlotDto ToDto(this RoleSlot s, Func<int?, string?> playerClassName)
+    {
+        var classId = s.Player?.Spec?.PlayerClassId;
+        return new(s.Id, s.SortOrder, s.PlayerId, s.Player?.Name, classId, playerClassName(classId));
+    }
 
     public static EncounterDto ToDto(this Encounter e, IEnumerable<Assignment> assignments, Func<int?, string?> symbolName) => new(
         e.Id, e.Name, e.SortOrder,
-        assignments.Select(a => a.ToDto(symbolName)).ToList()
+        assignments.Where(a => a.ParentAssignmentId == null).Select(a => a.ToDto(symbolName)).ToList()
     );
 
     public static AssignmentDto ToDto(this Assignment a, Func<int?, string?> symbolName) =>
         new(a.Id, a.SymbolId, symbolName(a.SymbolId), a.Description,
-            a.AssigneeRoleListId, a.AssigneePosition,
-            a.TargetRoleListId, a.TargetPosition, a.SortOrder);
+            a.SlotId, a.IsEnabled, a.SortOrder,
+            a.Children.OrderBy(c => c.SortOrder).Select(c => c.ToDto(symbolName)).ToList());
 }

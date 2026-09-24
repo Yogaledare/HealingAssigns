@@ -10,7 +10,6 @@ public class RoleList
     public Session Session { get; set; } = null!;
 
     public string? Icon { get; set; }
-    public int SlotCount { get; set; }
 
     public List<RoleSlot> Slots { get; set; } = [];
 }

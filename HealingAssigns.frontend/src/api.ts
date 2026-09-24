@@ -39,7 +39,6 @@ export interface RoleList {
   name: string
   icon: string | null
   sortOrder: number
-  slotCount: number
   slots: RoleSlot[]
 }
 
@@ -78,11 +77,11 @@ export interface References {
 
 export interface RoleSlot {
   id: number
-  playerName: string
+  sortOrder: number
+  playerId: number | null
+  playerName: string | null
   playerClassId: number | null
   playerClassName: string | null
-  playerId: number | null
-  sortOrder: number
 }
 
 export interface Player {
@@ -123,11 +122,10 @@ export interface Assignment {
   symbolId: number | null
   symbolName: string | null
   description: string | null
-  assigneeRoleListId: number
-  assigneePosition: number
-  targetRoleListId: number | null
-  targetPosition: number | null
+  slotId: number | null
+  isEnabled: boolean
   sortOrder: number
+  children: Assignment[]
 }
 
 export interface UserInfo {
@@ -197,24 +195,15 @@ export async function deleteRoleList(id: number): Promise<void> {
 }
 
 // Slots
-export async function createSlot(
-  roleListId: number,
-  playerId: number,
-): Promise<RoleSlot> {
-  const res = await apiFetch(`/rolelists/${roleListId}/slots`, {
-    method: 'POST',
-    body: JSON.stringify({ playerId }),
-  })
+export async function addSlot(roleListId: number): Promise<RoleSlot> {
+  const res = await apiFetch(`/rolelists/${roleListId}/slots`, { method: 'POST' })
   return res.json()
 }
 
-export async function updateSlotCount(
-  roleListId: number,
-  slotCount: number,
-): Promise<RoleList> {
-  const res = await apiFetch(`/rolelists/${roleListId}/slotcount`, {
+export async function setSlotPlayer(slotId: number, playerId: number | null): Promise<RoleSlot> {
+  const res = await apiFetch(`/slots/${slotId}/player`, {
     method: 'PUT',
-    body: JSON.stringify({ slotCount }),
+    body: JSON.stringify({ playerId }),
   })
   return res.json()
 }
@@ -252,34 +241,28 @@ export async function deleteEncounter(id: number): Promise<void> {
 }
 
 // Assignments
+export interface AssignmentInput {
+  symbolId: number | null
+  description: string | null
+  slotId: number | null
+  isEnabled: boolean
+}
+
 export async function createAssignment(
   encounterId: number,
-  symbolId: number | null,
-  description: string | null,
-  assigneeRoleListId: number,
-  assigneePosition: number,
-  targetRoleListId: number | null,
-  targetPosition: number | null,
+  parentAssignmentId: number | null,
 ): Promise<Assignment> {
   const res = await apiFetch(`/encounters/${encounterId}/assignments`, {
     method: 'POST',
-    body: JSON.stringify({ symbolId, description, assigneeRoleListId, assigneePosition, targetRoleListId, targetPosition }),
+    body: JSON.stringify({ parentAssignmentId, symbolId: null, description: null, slotId: null }),
   })
   return res.json()
 }
 
-export async function updateAssignment(
-  id: number,
-  symbolId: number | null,
-  description: string | null,
-  assigneeRoleListId: number,
-  assigneePosition: number,
-  targetRoleListId: number | null,
-  targetPosition: number | null,
-): Promise<Assignment> {
+export async function updateAssignment(id: number, input: AssignmentInput): Promise<Assignment> {
   const res = await apiFetch(`/assignments/${id}`, {
     method: 'PUT',
-    body: JSON.stringify({ symbolId, description, assigneeRoleListId, assigneePosition, targetRoleListId, targetPosition }),
+    body: JSON.stringify(input),
   })
   return res.json()
 }

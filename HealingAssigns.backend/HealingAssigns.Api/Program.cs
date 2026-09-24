@@ -58,7 +58,7 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<HealingAssignsDb>();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<LookupCache>().Load(db);
 }
 

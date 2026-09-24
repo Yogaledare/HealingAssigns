@@ -20,7 +20,9 @@ public class SessionService(HealingAssignsDb db, LookupCache lookup)
     {
         var session = await db.Sessions
             .Include(s => s.RoleLists.OrderBy(r => r.SortOrder))
-                .ThenInclude(r => r.Slots.OrderBy(s => s.SortOrder))
+                .ThenInclude(r => r.Slots.OrderBy(sl => sl.SortOrder))
+                    .ThenInclude(sl => sl.Player)
+                        .ThenInclude(p => p!.Spec)
             .Include(s => s.Encounters.OrderBy(e => e.SortOrder))
                 .ThenInclude(e => e.Assignments.OrderBy(a => a.SortOrder))
             .FirstOrDefaultAsync(s => s.Id == id);

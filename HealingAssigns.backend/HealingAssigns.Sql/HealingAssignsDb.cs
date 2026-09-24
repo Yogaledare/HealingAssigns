@@ -33,15 +33,16 @@ public class HealingAssignsDb : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Assignment>()
-            .HasOne(a => a.AssigneeRoleList)
+            .HasOne(a => a.Slot)
             .WithMany()
-            .HasForeignKey(a => a.AssigneeRoleListId)
+            .HasForeignKey(a => a.SlotId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        // Self-referential; SQL Server disallows cascade here, service deletes children explicitly
         modelBuilder.Entity<Assignment>()
-            .HasOne(a => a.TargetRoleList)
-            .WithMany()
-            .HasForeignKey(a => a.TargetRoleListId)
+            .HasOne(a => a.Parent)
+            .WithMany(a => a.Children)
+            .HasForeignKey(a => a.ParentAssignmentId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Assignment>()
@@ -63,14 +64,8 @@ public class HealingAssignsDb : DbContext
             .IsUnique();
 
         modelBuilder.Entity<Assignment>()
-            .HasIndex(a => new { a.EncounterId, a.SortOrder })
+            .HasIndex(a => new { a.EncounterId, a.ParentAssignmentId, a.SortOrder })
             .IsUnique();
-
-        modelBuilder.Entity<RoleSlot>()
-            .HasOne(s => s.PlayerClass)
-            .WithMany()
-            .HasForeignKey(s => s.PlayerClassId)
-            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<RoleSlot>()
             .HasOne(s => s.Player)
