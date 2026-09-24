@@ -57,8 +57,9 @@ app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {
+    // Schema is never touched at startup; migrations are applied deliberately
+    // with `dotnet ef database update` against the intended database.
     var db = scope.ServiceProvider.GetRequiredService<HealingAssignsDb>();
-    await db.Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<LookupCache>().Load(db);
 }
 
