@@ -131,20 +131,22 @@ public class RoleListService(HealingAssignsDb db, LookupCache lookup)
 
     public async Task ReorderSlots(int roleListId, List<int> slotIds)
     {
-        var slots = await db.RoleSlots
+        // Positions are fixed rungs: reordering moves the occupants between
+        // rungs, never the rows, so assignments stay bound to the position.
+        var rungs = await db.RoleSlots
             .Where(s => s.RoleListId == roleListId)
+            .OrderBy(s => s.SortOrder)
             .ToListAsync();
 
-        foreach (var slot in slots)
-            slot.SortOrder = -(slot.SortOrder + 1);
-        await db.SaveChangesAsync();
+        var byId = rungs.ToDictionary(s => s.Id);
+        var newOccupants = slotIds
+            .Where(byId.ContainsKey)
+            .Select(id => byId[id].PlayerId)
+            .ToList();
+        if (newOccupants.Count != rungs.Count) return; // stale request; ignore
 
-        for (var i = 0; i < slotIds.Count; i++)
-        {
-            var slot = slots.FirstOrDefault(s => s.Id == slotIds[i]);
-            if (slot is not null)
-                slot.SortOrder = i;
-        }
+        for (var i = 0; i < rungs.Count; i++)
+            rungs[i].PlayerId = newOccupants[i];
         await db.SaveChangesAsync();
     }
 }

@@ -104,6 +104,7 @@ export function DragDropProvider({
             const rl = activeInfo.roleList
             const newOrder = arrayMove(rl.slots.map(s => s.id), activeInfo.index, overInfo.index)
 
+            // Rungs stay put; only the occupants move between them
             queryClient.setQueryData<Session>(['session', session.id], (old) => {
                 if (!old) return old
                 return {
@@ -111,7 +112,19 @@ export function DragDropProvider({
                     roleLists: old.roleLists.map((r) => {
                         if (r.id !== rl.id) return r
                         const slotMap = new Map(r.slots.map((s) => [s.id, s]))
-                        return { ...r, slots: newOrder.map((id) => slotMap.get(id)!) }
+                        return {
+                            ...r,
+                            slots: r.slots.map((rung, k) => {
+                                const src = slotMap.get(newOrder[k])!
+                                return {
+                                    ...rung,
+                                    playerId: src.playerId,
+                                    playerName: src.playerName,
+                                    playerClassId: src.playerClassId,
+                                    playerClassName: src.playerClassName,
+                                }
+                            }),
+                        }
                     }),
                 }
             })
