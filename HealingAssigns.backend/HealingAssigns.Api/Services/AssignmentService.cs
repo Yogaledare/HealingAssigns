@@ -64,4 +64,27 @@ public class AssignmentService(HealingAssignsDb db, LookupCache lookup)
         await db.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> Reorder(int encounterId, List<int> assignmentIds)
+    {
+        var groups = await db.Assignments
+            .Where(a => a.EncounterId == encounterId && a.ParentAssignmentId == null)
+            .ToListAsync();
+
+        var byId = groups.ToDictionary(a => a.Id);
+        var ordered = assignmentIds
+            .Distinct()
+            .Where(byId.ContainsKey)
+            .Select(id => byId[id])
+            .ToList();
+        if (ordered.Count != groups.Count) return false; // stale request; ignore
+
+        // The unique (EncounterId, ParentAssignmentId, SortOrder) index is filtered to
+        // child rows, so top-level rows can be renumbered in a single save. Children
+        // keep their own per-parent numbering and are untouched.
+        for (var i = 0; i < ordered.Count; i++)
+            ordered[i].SortOrder = i;
+        await db.SaveChangesAsync();
+        return true;
+    }
 }

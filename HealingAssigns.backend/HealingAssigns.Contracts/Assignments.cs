@@ -12,6 +12,8 @@ public record UpdateAssignmentRequest(
     int? SlotId,
     bool IsEnabled);
 
+public record ReorderAssignmentsRequest(List<int> AssignmentIds);
+
 public record AssignmentDto(
     int Id,
     int? SymbolId,

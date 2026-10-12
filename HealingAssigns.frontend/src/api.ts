@@ -271,6 +271,13 @@ export async function deleteAssignment(id: number): Promise<void> {
   await apiFetch(`/assignments/${id}`, { method: 'DELETE' })
 }
 
+export async function reorderAssignments(encounterId: number, assignmentIds: number[]): Promise<void> {
+  await apiFetch(`/encounters/${encounterId}/assignments/reorder`, {
+    method: 'PUT',
+    body: JSON.stringify({ assignmentIds }),
+  })
+}
+
 // Players
 export async function getPlayers(): Promise<Player[]> {
   const res = await apiFetch('/players')

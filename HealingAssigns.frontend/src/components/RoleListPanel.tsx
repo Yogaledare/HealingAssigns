@@ -1,20 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-    SortableContext,
-    useSortable,
-    verticalListSortingStrategy,
-    defaultAnimateLayoutChanges,
-    type AnimateLayoutChanges,
-} from '@dnd-kit/sortable'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Session, RoleList, RoleSlot } from '../api'
 import * as api from '../api'
-import { readableColor, isLightColor } from '../lib/color'
-import { useReferences, getClassColor } from '../hooks/useReferences'
 import { useDragDropContext } from './DragDropProvider'
 import { slotId } from '../lib/dragIds'
+import { noAnimateOnDrop } from '../lib/sortable'
 import { SlotNumberBadge } from './SlotNumberBadge'
+import { SlotBadge } from './SlotBadge'
+import { CLASS_LABEL_WIDTH } from '../lib/layout'
 
 const ICON_CHOICES = ['🛡️', '⚔️', '💚', '✨', '🌙', '⭐', '💀', '🔨', '🏹', '🔮', '😇', '🐻', '❄️', '🔥', '🌿', '⚡', '💧', '🎯']
 
@@ -78,28 +73,6 @@ function IconPicker({ value, onChange }: { value: string | null; onChange: (icon
     )
 }
 
-function SlotBadge({ slot, ghost }: { slot: RoleSlot; ghost?: boolean }) {
-    const { data: refs } = useReferences()
-    const color = getClassColor(refs, slot.playerClassId)
-    const light = isLightColor(color)
-    return (
-        <span
-            className="badge rounded-pill px-2 py-1 text-start"
-            style={{
-                backgroundColor: light ? readableColor(color) : (color ?? '#6c757d'),
-                color: '#fff',
-                fontSize: '0.8rem',
-                opacity: ghost ? 0.4 : 1,
-            }}
-        >
-            {slot.playerName}
-        </span>
-    )
-}
-
-const noAnimateOnDrop: AnimateLayoutChanges = (args) =>
-    args.isSorting || args.wasDragging ? false : defaultAnimateLayoutChanges(args)
-
 function SortableSlot({
     slot,
     ghost,
@@ -140,10 +113,12 @@ function SortableSlot({
         >
             {filled ? (
                 <>
-                    <div className="flex-grow-1" style={{ outline: highlight ? '2px solid #0d6efd' : undefined, borderRadius: 12 }}>
+                    <div className="flex-grow-1" style={{ outline: highlight ? '2px solid #0d6efd' : undefined, borderRadius: 6 }}>
                         <SlotBadge slot={slot} ghost={ghost} />
                     </div>
-                    <small className="text-secondary">{slot.playerClassName ?? ''}</small>
+                    <small className="text-secondary text-end text-truncate flex-shrink-0" style={{ width: CLASS_LABEL_WIDTH }}>
+                        {slot.playerClassName ?? ''}
+                    </small>
                     <button
                         className="btn btn-sm btn-outline-secondary py-0 px-1"
                         onPointerDown={(e) => e.stopPropagation()}
@@ -162,13 +137,14 @@ function SortableSlot({
                             height: 28,
                             border: '1px dashed',
                             borderColor: highlight ? '#0d6efd' : '#dee2e6',
-                            borderRadius: 4,
+                            borderRadius: 6,
                             backgroundColor: highlight ? 'rgba(13,110,253,0.05)' : undefined,
                             transition: 'border-color 0.15s, background-color 0.15s',
                         }}
                     >
                         <small className="text-secondary fst-italic">open</small>
                     </div>
+                    <span className="flex-shrink-0" style={{ width: CLASS_LABEL_WIDTH }} />
                     <button
                         className="btn btn-sm btn-outline-danger py-0 px-1"
                         onPointerDown={(e) => e.stopPropagation()}
@@ -268,7 +244,7 @@ function RoleListCard({
     )
 }
 
-export function RoleListPanel({ session, onToggleRoster, rosterOpen }: { session: Session; onToggleRoster: () => void; rosterOpen: boolean }) {
+export function RoleListPanel({ session }: { session: Session }) {
     const queryClient = useQueryClient()
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ['session', session.id] })
 
@@ -308,49 +284,21 @@ export function RoleListPanel({ session, onToggleRoster, rosterOpen }: { session
     const [newListIcon, setNewListIcon] = useState('')
     const [showAddForm, setShowAddForm] = useState(false)
 
-    const handleAddList = () => {
-        if (!newListName.trim()) return
-        addList.mutate({ name: newListName.trim(), icon: newListIcon || null })
+    const closeAddForm = () => {
         setNewListName('')
         setNewListIcon('')
         setShowAddForm(false)
     }
 
+    const handleAddList = () => {
+        if (!newListName.trim()) return
+        addList.mutate({ name: newListName.trim(), icon: newListIcon || null })
+        closeAddForm()
+    }
+
     return (
         <div>
-            <div className="d-flex align-items-center justify-content-between mb-3">
-                <h5 className="mb-0">Role Lists</h5>
-                <div className="d-flex gap-1">
-                    <button
-                        className={`btn btn-sm ${rosterOpen ? 'btn-secondary' : 'btn-outline-secondary'}`}
-                        onClick={onToggleRoster}
-                    >
-                        <i className="fa-solid fa-users" />
-                    </button>
-                    <button className="btn btn-primary btn-sm" onClick={() => setShowAddForm(!showAddForm)}>
-                        + List
-                    </button>
-                </div>
-            </div>
-
-            {showAddForm && (
-                <div className="card mb-3">
-                    <div className="card-body p-2">
-                        <div className="d-flex align-items-center gap-1">
-                            <IconPicker value={newListIcon || null} onChange={(v) => setNewListIcon(v ?? '')} />
-                            <input
-                                className="form-control form-control-sm"
-                                placeholder="List name"
-                                value={newListName}
-                                onChange={(e) => setNewListName(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddList()}
-                                autoFocus
-                            />
-                            <button className="btn btn-primary btn-sm" onClick={handleAddList}>Add</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <h5 className="mb-3">Role Lists</h5>
 
             {session.roleLists.length === 0 && !showAddForm && (
                 <p className="text-secondary small">No role lists yet.</p>
@@ -369,6 +317,36 @@ export function RoleListPanel({ session, onToggleRoster, rosterOpen }: { session
                     />
                 ))}
             </div>
+
+            {/* At the bottom: that is where you are when you want the next one */}
+            {showAddForm ? (
+                <div className="card mt-3">
+                    <div className="card-body p-2">
+                        <div className="d-flex align-items-center gap-1">
+                            <IconPicker value={newListIcon || null} onChange={(v) => setNewListIcon(v ?? '')} />
+                            <input
+                                className="form-control form-control-sm"
+                                placeholder="List name"
+                                value={newListName}
+                                onChange={(e) => setNewListName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleAddList()
+                                    if (e.key === 'Escape') closeAddForm()
+                                }}
+                                autoFocus
+                            />
+                            <button className="btn btn-primary btn-sm" onClick={handleAddList}>Add</button>
+                            <button className="btn btn-outline-secondary btn-sm" onClick={closeAddForm} title="Cancel">
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <button className="btn btn-outline-secondary btn-sm w-100 mt-3" onClick={() => setShowAddForm(true)}>
+                    + Add list
+                </button>
+            )}
         </div>
     )
 }

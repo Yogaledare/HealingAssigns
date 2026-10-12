@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import type { RoleList, RoleSlot } from '../api'
 import { readableColor } from '../lib/color'
 import { useReferences, getClassColor } from '../hooks/useReferences'
+import { usePlayers } from '../hooks/usePlayers'
+import { SlotBadge } from './SlotBadge'
 import { SlotNumberBadge } from './SlotNumberBadge'
 
 export function findSlot(roleLists: RoleList[], slotId: number | null): { slot: RoleSlot; list: RoleList; pos: number; listIndex: number } | null {
@@ -28,19 +30,40 @@ function IdentityLabel({ list, pos, badgeSize = 20 }: { list: RoleList; pos: num
     )
 }
 
-/** Shows who currently occupies a slot — the resolved person, not the assignment. */
+/** Who currently occupies a slot: the same token the role list uses, in its
+ *  outline form and at input height, so it sits in the row like a read-only
+ *  field. It is a reference to whoever is on that rung, not a thing you can
+ *  pick up, so no grip and no grab cursor. An open rung is the same dashed box
+ *  the role list shows, and a player marked inactive in the roster is ghosted
+ *  here too. */
 export function SlotOccupant({ roleLists, slotId }: { roleLists: RoleList[]; slotId: number | null }) {
-    const { data: refs } = useReferences()
+    const { data: players } = usePlayers()
     const info = findSlot(roleLists, slotId)
     if (!info) return <span className="text-secondary">—</span>
-    if (!info.slot.playerName) return <span className="text-secondary fst-italic">open</span>
+
+    const { slot } = info
+    if (!slot.playerName) {
+        return (
+            <div
+                className="d-flex align-items-center px-2"
+                style={{ height: 31, border: '1px dashed #ced4da', borderRadius: 6, cursor: 'default' }}
+            >
+                <small className="text-secondary fst-italic">open</small>
+            </div>
+        )
+    }
+
+    const inactive = slot.playerId != null && players?.find((p) => p.id === slot.playerId)?.isActive === false
     return (
-        <span
-            className="fw-semibold"
-            style={{ color: readableColor(getClassColor(refs, info.slot.playerClassId)) }}
-        >
-            {info.slot.playerName}
-        </span>
+        <div style={{ cursor: 'default', userSelect: 'none' }}>
+            <SlotBadge
+                variant="outline"
+                height={31}
+                slot={slot}
+                ghost={inactive}
+                title={inactive ? `${slot.playerName} is marked inactive in the roster` : undefined}
+            />
+        </div>
     )
 }
 

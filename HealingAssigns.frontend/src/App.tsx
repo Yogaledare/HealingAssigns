@@ -111,6 +111,15 @@ function SessionView() {
                     <span className="fw-bold">{session?.name}</span>
                 </div>
                 <div className="d-flex align-items-center gap-2">
+                    <button
+                        className={`btn btn-sm me-2 ${rosterOpen ? 'btn-secondary' : 'btn-outline-secondary'}`}
+                        onClick={() => setRosterOpen(!rosterOpen)}
+                        disabled={!session}
+                        title={rosterOpen ? 'Hide the roster drawer' : 'Show the roster drawer'}
+                    >
+                        <i className="fa-solid fa-users me-1" />
+                        Roster
+                    </button>
                     <small className="text-secondary">{user!.email}</small>
                     <button className="btn btn-outline-secondary btn-sm" onClick={logout}>
                         Sign out
@@ -133,7 +142,7 @@ function SessionView() {
                                 <EncounterPanel session={session} />
                             </div>
                             <div className="col-auto border-start overflow-auto p-3" style={{ width: 340 }}>
-                                <RoleListPanel session={session} onToggleRoster={() => setRosterOpen(!rosterOpen)} rosterOpen={rosterOpen} />
+                                <RoleListPanel session={session} />
                             </div>
                         </div>
                         {rosterOpen && (

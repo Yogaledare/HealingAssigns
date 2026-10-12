@@ -22,5 +22,9 @@ public static class AssignmentEndpoints
         app.MapDelete("/assignments/{id}", async (int id, AssignmentService svc) =>
             await svc.Delete(id) ? Results.NoContent() : Results.NotFound())
             .RequireAuthorization();
+
+        app.MapPut("/encounters/{encounterId}/assignments/reorder", async (int encounterId, ReorderAssignmentsRequest req, AssignmentService svc) =>
+            await svc.Reorder(encounterId, req.AssignmentIds) ? Results.NoContent() : Results.BadRequest())
+            .RequireAuthorization();
     }
 }

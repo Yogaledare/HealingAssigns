@@ -13,11 +13,14 @@ import {
     type DragEndEvent,
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import type { Session, Player } from '../api'
+import type { Session, Player, RoleSlot } from '../api'
 import * as api from '../api'
 import { usePlayers } from '../hooks/usePlayers'
 import { parseDragId } from '../lib/dragIds'
+import { assignmentLine } from '../lib/macro'
 import { isLightColor, readableColor } from '../lib/color'
+import { SlotBadge } from './SlotBadge'
+import { CLASS_LABEL_WIDTH } from '../lib/layout'
 
 interface DragDropContextValue {
     playerActiveMap: Map<number, boolean>
@@ -71,12 +74,27 @@ export function DragDropProvider({
         onSuccess: invalidateSession,
     })
 
+    const reorderAssignments = useMutation({
+        mutationFn: (args: { encounterId: number; assignmentIds: number[] }) =>
+            api.reorderAssignments(args.encounterId, args.assignmentIds),
+        onSettled: invalidateSession,
+    })
+
     const playerActiveMap = new Map(players.map(p => [p.id, p.isActive]))
 
     const findSlotInfo = (slotIdNum: number) => {
         for (const rl of session.roleLists) {
             const idx = rl.slots.findIndex(s => s.id === slotIdNum)
             if (idx >= 0) return { roleList: rl, slot: rl.slots[idx], index: idx }
+        }
+        return null
+    }
+
+    // Top-level assignments only: those are the sortable groups
+    const findAssignmentInfo = (assignmentIdNum: number) => {
+        for (const enc of session.encounters) {
+            const idx = enc.assignments.findIndex(a => a.id === assignmentIdNum)
+            if (idx >= 0) return { encounter: enc, assignment: enc.assignments[idx], index: idx }
         }
         return null
     }
@@ -92,7 +110,39 @@ export function DragDropProvider({
 
         const activeParsed = parseDragId(active.id)
         const overParsed = parseDragId(over.id)
-        if (!activeParsed || !overParsed || overParsed.type !== 'slot') return
+        if (!activeParsed || !overParsed) return
+
+        if (activeParsed.type === 'assignment') {
+            if (overParsed.type !== 'assignment' || active.id === over.id) return
+            const activeInfo = findAssignmentInfo(activeParsed.id)
+            const overInfo = findAssignmentInfo(overParsed.id)
+            if (!activeInfo || !overInfo) return
+            if (activeInfo.encounter.id !== overInfo.encounter.id) return
+
+            const enc = activeInfo.encounter
+            const newOrder = arrayMove(enc.assignments.map(a => a.id), activeInfo.index, overInfo.index)
+
+            // Unlike slots, the group row itself moves; its sub-rows travel inside it
+            queryClient.setQueryData<Session>(['session', session.id], (old) => {
+                if (!old) return old
+                return {
+                    ...old,
+                    encounters: old.encounters.map((e) => {
+                        if (e.id !== enc.id) return e
+                        const byId = new Map(e.assignments.map((a) => [a.id, a]))
+                        if (newOrder.some((id) => !byId.has(id))) return e
+                        return {
+                            ...e,
+                            assignments: newOrder.map((id, i) => ({ ...byId.get(id)!, sortOrder: i })),
+                        }
+                    }),
+                }
+            })
+            reorderAssignments.mutate({ encounterId: enc.id, assignmentIds: newOrder })
+            return
+        }
+
+        if (overParsed.type !== 'slot') return
 
         if (activeParsed.type === 'slot') {
             if (active.id === over.id) return
@@ -145,6 +195,10 @@ export function DragDropProvider({
         ? findSlotInfo(activeItem.id)?.slot
         : null
 
+    const activeAssignment = activeItem?.type === 'assignment'
+        ? findAssignmentInfo(activeItem.id)?.assignment
+        : null
+
     const isDraggingPlayer = activeItem?.type === 'player'
 
     return (
@@ -159,7 +213,8 @@ export function DragDropProvider({
                 {children}
                 <DragOverlay dropAnimation={null}>
                     {activePlayer && <PlayerOverlay player={activePlayer} />}
-                    {activeSlot && <SlotOverlay name={activeSlot.playerName ?? '(open)'} />}
+                    {activeSlot && <SlotOverlay slot={activeSlot} />}
+                    {activeAssignment && <AssignmentOverlay text={assignmentLine(activeAssignment, session)} />}
                 </DragOverlay>
             </DndContext>
         </DragDropContext.Provider>
@@ -182,10 +237,54 @@ function PlayerOverlay({ player }: { player: Player }) {
     )
 }
 
-function SlotOverlay({ name }: { name: string }) {
+/** A lifted role-list row: the same token and class name as the row it came
+ *  from, so it looks like the row content travelled with the pointer. */
+function SlotOverlay({ slot }: { slot: RoleSlot }) {
     return (
-        <span className="badge rounded-pill px-2 py-1 bg-secondary" style={{ fontSize: '0.8rem' }}>
-            {name}
-        </span>
+        <div className="d-flex align-items-center gap-2" style={{ cursor: 'grabbing' }}>
+            <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                {slot.playerName ? (
+                    <SlotBadge slot={slot} />
+                ) : (
+                    <div
+                        className="d-flex align-items-center px-2 bg-white"
+                        style={{ height: 28, border: '1px dashed #ced4da', borderRadius: 6 }}
+                    >
+                        <small className="text-secondary fst-italic">open</small>
+                    </div>
+                )}
+            </div>
+            <small className="text-secondary text-end text-truncate flex-shrink-0" style={{ width: CLASS_LABEL_WIDTH }}>
+                {slot.playerClassName ?? ''}
+            </small>
+            {/* Invisible twin of the row's × button, so the lifted token is exactly the row's width */}
+            <button
+                className="btn btn-sm btn-outline-secondary py-0 px-1"
+                style={{ fontSize: '0.65rem', visibility: 'hidden' }}
+                tabIndex={-1}
+                aria-hidden
+            >
+                ×
+            </button>
+        </div>
+    )
+}
+
+/** Ghost of the group being moved. DragOverlay sizes it to the card it came
+ *  from, and it carries only the macro fragment, so no inputs or dropdowns are
+ *  ever cloned into the overlay. */
+function AssignmentOverlay({ text }: { text: string }) {
+    return (
+        <div
+            className="d-flex align-items-center px-3 font-monospace small rounded h-100"
+            style={{
+                border: '1px dashed #6c757d',
+                backgroundColor: 'rgba(248, 249, 250, 0.92)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                cursor: 'grabbing',
+            }}
+        >
+            {text}
+        </div>
     )
 }

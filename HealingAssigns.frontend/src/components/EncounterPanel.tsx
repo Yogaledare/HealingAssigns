@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Session, Encounter, Assignment, AssignmentInput } from '../api'
 import * as api from '../api'
-import { SlotSelect, SlotOccupant, findSlot } from './SlotSelect'
+import { SlotSelect, SlotOccupant } from './SlotSelect'
 import { useReferences } from '../hooks/useReferences'
+import { assignmentId } from '../lib/dragIds'
+import { noAnimateOnDrop } from '../lib/sortable'
+import { buildMacro } from '../lib/macro'
+import { InlineName } from './InlineName'
 
 export function EncounterPanel({ session }: { session: Session }) {
     const queryClient = useQueryClient()
@@ -19,6 +25,16 @@ export function EncounterPanel({ session }: { session: Session }) {
         onSuccess: invalidate,
     })
 
+    // Optimistic, so the title and the macro line change the moment you commit
+    const renameEncounter = useMutation({
+        mutationFn: (args: { id: number; name: string }) => api.updateEncounter(args.id, args.name),
+        onMutate: ({ id, name }) => {
+            queryClient.setQueryData<Session>(['session', session.id], (old) =>
+                old && { ...old, encounters: old.encounters.map((e) => (e.id === id ? { ...e, name } : e)) })
+        },
+        onSettled: invalidate,
+    })
+
     const handleAdd = () => {
         const name = prompt('Encounter name (e.g. "Attumen", "Moroes", "Trash - General")')
         if (name) addEncounter.mutate(name)
@@ -26,12 +42,7 @@ export function EncounterPanel({ session }: { session: Session }) {
 
     return (
         <div>
-            <div className="d-flex align-items-center justify-content-between mb-3">
-                <h5 className="mb-0">Encounters</h5>
-                <button className="btn btn-primary btn-sm" onClick={handleAdd}>
-                    + Encounter
-                </button>
-            </div>
+            <h5 className="mb-3">Encounters</h5>
 
             {session.encounters.length === 0 && (
                 <p className="text-secondary text-center py-5">
@@ -45,10 +56,20 @@ export function EncounterPanel({ session }: { session: Session }) {
                         key={encounter.id}
                         encounter={encounter}
                         session={session}
+                        onRename={(name) => renameEncounter.mutate({ id: encounter.id, name })}
                         onRemove={() => removeEncounter.mutate(encounter.id)}
                     />
                 ))}
             </div>
+
+            {/* At the bottom: that is where you are when you want the next one */}
+            <button
+                className="btn btn-outline-secondary w-100 mt-3"
+                onClick={handleAdd}
+                disabled={addEncounter.isPending}
+            >
+                + Add encounter
+            </button>
         </div>
     )
 }
@@ -62,13 +83,43 @@ function toInput(a: Assignment): AssignmentInput {
     }
 }
 
+// Each group is its own card so that dragging it moves its sub-rows along.
+// The header strip and every card share this column plan, so the columns
+// still line up down the whole list.
+const COLUMNS: { label: string; width: string | number }[] = [
+    { label: 'Symbol', width: '13%' },
+    { label: 'Assignment', width: '18%' },
+    { label: 'Currently', width: '15%' },
+    { label: 'Note', width: '34%' },
+    { label: '', width: 56 },
+    { label: '', width: 110 },
+]
+const HANDLE_WIDTH = 22
+const GROUP_BORDER = '1px solid #dee2e6'
+
+// Fixed layout so the <col> widths are honored exactly; transparent cells so
+// the card background shows through.
+const tableStyle = { tableLayout: 'fixed', '--bs-table-bg': 'transparent' } as CSSProperties
+
+function ColGroup() {
+    return (
+        <colgroup>
+            {COLUMNS.map((c, i) => (
+                <col key={i} style={{ width: c.width }} />
+            ))}
+        </colgroup>
+    )
+}
+
 function EncounterCard({
     encounter,
     session,
+    onRename,
     onRemove,
 }: {
     encounter: Encounter
     session: Session
+    onRename: (name: string) => void
     onRemove: () => void
 }) {
     const queryClient = useQueryClient()
@@ -95,27 +146,26 @@ function EncounterCard({
     return (
         <div className="card">
             <div className="card-body p-3">
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                    <h6 className="card-title mb-0 fw-bold">{encounter.name}</h6>
-                    <button className="btn btn-sm btn-outline-danger" onClick={onRemove}>
+                <div className="d-flex align-items-center justify-content-between gap-3 mb-2">
+                    <InlineName
+                        value={encounter.name}
+                        onCommit={onRename}
+                        className="fw-bold"
+                        style={{ fontSize: '1rem' }}
+                    />
+                    <button className="btn btn-sm btn-outline-danger flex-shrink-0" onClick={onRemove}>
                         Delete
                     </button>
                 </div>
 
-                <table className="table table-sm table-borderless align-middle mb-1">
-                    <thead>
-                        <tr>
-                            <th style={{ width: '13%' }}>Symbol</th>
-                            <th style={{ width: '26%' }}>Assignment</th>
-                            <th style={{ width: '15%' }}>Currently</th>
-                            <th style={{ width: '26%' }}>Note</th>
-                            <th style={{ width: 40 }}></th>
-                            <th style={{ width: 110 }}></th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <AssignmentHeader />
+                <SortableContext
+                    items={encounter.assignments.map((a) => assignmentId(a.id))}
+                    strategy={verticalListSortingStrategy}
+                >
+                    <div className="d-flex flex-column gap-2 mb-2">
                         {encounter.assignments.map((a) => (
-                            <AssignmentBlock
+                            <AssignmentGroup
                                 key={a.id}
                                 assignment={a}
                                 session={session}
@@ -124,8 +174,8 @@ function EncounterCard({
                                 onAddChild={() => addAssignment.mutate(a.id)}
                             />
                         ))}
-                    </tbody>
-                </table>
+                    </div>
+                </SortableContext>
 
                 <button
                     className="btn btn-outline-secondary btn-sm w-100"
@@ -141,7 +191,31 @@ function EncounterCard({
     )
 }
 
-function AssignmentBlock({
+function AssignmentHeader() {
+    // Same handle strip and border as a card, just invisible, so the columns line up
+    return (
+        <div className="d-flex" style={{ border: '1px solid transparent' }}>
+            <div className="flex-shrink-0" style={{ width: HANDLE_WIDTH }} />
+            <div className="flex-grow-1 px-2">
+                <table className="table table-sm table-borderless mb-0" style={tableStyle}>
+                    <ColGroup />
+                    <thead>
+                        <tr>
+                            {COLUMNS.map((c, i) => (
+                                <th key={i}>{c.label}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    )
+}
+
+/** One top-level assignment with its sub-rows, as a single sortable card.
+ *  Only the strip on the left is a drag handle, so the controls inside need
+ *  no pointer-event workarounds. */
+function AssignmentGroup({
     assignment,
     session,
     onUpdate,
@@ -154,29 +228,63 @@ function AssignmentBlock({
     onRemove: (id: number) => void
     onAddChild: () => void
 }) {
+    const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } =
+        useSortable({ id: assignmentId(assignment.id), animateLayoutChanges: noAnimateOnDrop })
+
+    // While dragging, this card stays in the list as an empty dashed placeholder
+    // that slides to where the group will land. The ghost under the pointer is
+    // the DragOverlay in DragDropProvider.
+    const hidden: CSSProperties | undefined = isDragging ? { visibility: 'hidden' } : undefined
+
     return (
-        <>
-            <AssignmentRow
-                assignment={assignment}
-                session={session}
-                depth={0}
-                parentEnabled
-                onUpdate={onUpdate}
-                onRemove={onRemove}
-                onAddChild={onAddChild}
-            />
-            {assignment.children.map((c) => (
-                <AssignmentRow
-                    key={c.id}
-                    assignment={c}
-                    session={session}
-                    depth={1}
-                    parentEnabled={assignment.isEnabled}
-                    onUpdate={onUpdate}
-                    onRemove={onRemove}
-                />
-            ))}
-        </>
+        <div
+            ref={setNodeRef}
+            className="d-flex rounded"
+            style={{
+                transform: CSS.Transform.toString(transform),
+                transition,
+                border: isDragging ? '1px dashed #adb5bd' : GROUP_BORDER,
+                backgroundColor: isDragging ? '#f1f3f5' : '#f8f9fa',
+            }}
+        >
+            <div
+                ref={setActivatorNodeRef}
+                {...attributes}
+                {...listeners}
+                className="d-flex align-items-center justify-content-center flex-shrink-0 text-secondary user-select-none"
+                title="Drag to reorder"
+                style={{ width: HANDLE_WIDTH, cursor: 'grab', touchAction: 'none', borderRight: GROUP_BORDER, ...hidden }}
+            >
+                <i className="fa-solid fa-grip-vertical" style={{ fontSize: '0.8rem' }} />
+            </div>
+            <div className="flex-grow-1 px-2 py-1" style={hidden}>
+                <table className="table table-sm table-borderless align-middle mb-0" style={tableStyle}>
+                    <ColGroup />
+                    <tbody>
+                        <AssignmentRow
+                            assignment={assignment}
+                            session={session}
+                            depth={0}
+                            parentEnabled
+                            onUpdate={onUpdate}
+                            onRemove={onRemove}
+                            onAddChild={onAddChild}
+                        />
+                        {assignment.children.map((c) => (
+                            <AssignmentRow
+                                key={c.id}
+                                assignment={c}
+                                session={session}
+                                depth={1}
+                                parentEnabled={assignment.isEnabled}
+                                onUpdate={onUpdate}
+                                onRemove={onRemove}
+                            />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     )
 }
 
@@ -245,13 +353,19 @@ function AssignmentRow({
                     onChange={(e) => handleChange({ description: e.target.value || null })}
                 />
             </td>
-            <td className="text-center">
-                <div className="form-check form-switch d-inline-block" title={assignment.isEnabled ? 'Enabled' : 'Disabled — excluded from macro'}>
+            <td>
+                {/* Bootstrap sizes the switch for a line of text and offsets it to
+                    sit on the baseline. Strip those offsets and center it in the
+                    cell so it lines up with the inputs. */}
+                <div className="form-check form-switch d-flex justify-content-center p-0 m-0" style={{ minHeight: 0 }}>
                     <input
-                        className="form-check-input"
+                        className="form-check-input m-0 flex-shrink-0"
                         type="checkbox"
+                        role="switch"
                         checked={assignment.isEnabled}
                         onChange={(e) => handleChange({ isEnabled: e.target.checked })}
+                        title={assignment.isEnabled ? 'Enabled' : 'Disabled — excluded from macro'}
+                        style={{ width: '2.5em', height: '1.25em', cursor: 'pointer' }}
                     />
                 </div>
             </td>
@@ -302,25 +416,4 @@ function MacroOutput({ text }: { text: string }) {
             </pre>
         </div>
     )
-}
-
-function buildMacro(encounter: Encounter, session: Session): string {
-    const nameOf = (slotId: number | null) =>
-        slotId != null ? (findSlot(session.roleLists, slotId)?.slot.playerName ?? '?') : null
-
-    const partFor = (a: Assignment): string => {
-        const name = nameOf(a.slotId)
-        if (name && a.description) return `${name} (${a.description})`
-        return name ?? a.description ?? '?'
-    }
-
-    const lines = encounter.assignments
-        .filter((a) => a.isEnabled)
-        .map((a) => {
-            const marker = a.symbolName ? `{${a.symbolName.toLowerCase()}} ` : ''
-            const kids = a.children.filter((c) => c.isEnabled).map(partFor).join('+')
-            const head = partFor(a)
-            return kids ? `${marker}${head}: ${kids}` : `${marker}${head}`
-        })
-    return `/raid ${encounter.name}: ${lines.join(' | ')}`
 }
